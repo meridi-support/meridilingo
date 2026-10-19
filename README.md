@@ -1,3 +1,6 @@
+<p align="center">
+  <img src="MeridiLingo.jpg" alt="MeridiLingo" width="100%">
+</p>
 
 # 🐾🪄 MeridiLingo — Language Evolution Explorer
 
