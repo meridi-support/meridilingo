@@ -22,14 +22,6 @@ A standalone desktop app that lets you explore 315+ English expressions across 2
 
 *Coming soon*
 
-| Product | Description | Status |
-|---------|-------------|--------|
-| [MeridiSync](https://github.com/meridi-support/meridi-square) | Text efficiency tool | ✅ Launched |
-| [MeridiMeet](https://github.com/meridi-support/meridimeet) | Multi-timezone tool | ✅ Free |
-| MeridiAtlas | Map × Business intelligence | 🔧 In Development |
-| MeridiDiary | Travel & life journal | 📋 Planned |
-| **MeridiLingo** | **Language evolution explorer** | **✅ Launched** |
-
 ## Version
 
 - **Current:** v1.0.0 (October 15, 2026)
