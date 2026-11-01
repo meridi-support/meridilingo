@@ -1,0 +1,1143 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridi Lingo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e0e0e0;min-height:100vh;}
+
+/* Boot Screen */
+.boot-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.8s ease;}
+.boot-screen.fade-out{opacity:0;pointer-events:none;}
+.boot-title{font-size:2.5rem;font-weight:700;color:#39ff14;margin-bottom:8px;letter-spacing:2px;}
+.boot-subtitle{font-size:1rem;color:#888;margin-bottom:20px;}
+.boot-icon{font-size:3rem;margin-bottom:20px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.1);}}
+.boot-bar{width:200px;height:3px;background:#222;border-radius:2px;overflow:hidden;}
+.boot-bar-fill{height:100%;width:0%;background:#39ff14;border-radius:2px;transition:width 0.3s;}
+
+/* Header */
+.header{background:#111;border-bottom:1px solid #333;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.header h1{font-size:1.4rem;color:#39ff14;font-weight:700;letter-spacing:1px;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.version-badge{background:#222;color:#39ff14;padding:3px 10px;border-radius:12px;font-size:0.7rem;border:1px solid #333;}
+.counter-badge{background:#222;color:#ff9500;padding:3px 10px;border-radius:12px;font-size:0.7rem;border:1px solid #333;}
+
+/* Category Tabs */
+.tab-container{background:#111;border-bottom:1px solid #222;padding:8px 16px;overflow-x:auto;white-space:nowrap;position:sticky;top:52px;z-index:99;}
+.tab-container::-webkit-scrollbar{height:4px;}
+.tab-container::-webkit-scrollbar-thumb{background:#333;border-radius:2px;}
+.tab-btn{display:inline-block;padding:6px 14px;margin:2px 4px;border-radius:16px;border:1px solid #333;background:#1a1a1a;color:#aaa;font-size:0.75rem;cursor:pointer;transition:all 0.2s;}
+.tab-btn:hover{border-color:#39ff14;color:#39ff14;}
+.tab-btn.active{background:#39ff14;color:#0a0a0a;border-color:#39ff14;font-weight:600;}
+
+/* Search & Controls */
+.controls{background:#111;padding:12px 20px;border-bottom:1px solid #222;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.search-box{flex:1;min-width:200px;padding:8px 14px;border-radius:20px;border:1px solid #333;background:#1a1a1a;color:#e0e0e0;font-size:0.85rem;outline:none;}
+.search-box:focus{border-color:#39ff14;}
+.search-box::placeholder{color:#555;}
+.mode-btn{padding:6px 14px;border-radius:16px;border:1px solid #333;background:#1a1a1a;color:#aaa;font-size:0.75rem;cursor:pointer;transition:all 0.2s;}
+.mode-btn:hover{border-color:#ff9500;color:#ff9500;}
+.mode-btn.active{background:#ff9500;color:#0a0a0a;border-color:#ff9500;font-weight:600;}
+.era-select{padding:6px 10px;border-radius:12px;border:1px solid #333;background:#1a1a1a;color:#aaa;font-size:0.75rem;outline:none;}
+
+/* Card Grid */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;padding:20px;max-width:1400px;margin:0 auto;}
+
+/* Cards */
+.card{background:#151515;border:1px solid #282828;border-radius:12px;padding:16px;transition:all 0.3s;cursor:pointer;position:relative;overflow:hidden;}
+.card:hover{border-color:#39ff14;transform:translateY(-2px);box-shadow:0 4px 20px rgba(57,255,20,0.1);}
+.card-era{position:absolute;top:10px;right:10px;background:#222;color:#888;padding:2px 8px;border-radius:8px;font-size:0.65rem;}
+.card-category{font-size:0.7rem;color:#39ff14;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;}
+.card-word{font-size:1.2rem;font-weight:700;color:#fff;margin-bottom:8px;}
+.card-meaning{font-size:0.85rem;color:#aaa;margin-bottom:10px;line-height:1.4;}
+.card-example{font-size:0.8rem;color:#666;font-style:italic;margin-bottom:8px;padding:8px;background:#1a1a1a;border-radius:6px;border-left:3px solid #39ff14;}
+.card-source{font-size:0.7rem;color:#555;margin-bottom:4px;}
+.card-trivia{font-size:0.75rem;color:#ff9500;margin-top:8px;padding:8px;background:rgba(255,149,0,0.08);border-radius:6px;display:none;}
+.card.expanded .card-trivia{display:block;}
+
+/* Quiz Mode */
+.quiz-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:200;align-items:center;justify-content:center;}
+.quiz-overlay.active{display:flex;}
+.quiz-card{background:#151515;border:2px solid #39ff14;border-radius:16px;padding:30px;max-width:500px;width:90%;text-align:center;}
+.quiz-question{font-size:1.3rem;color:#fff;margin-bottom:20px;}
+.quiz-options{display:flex;flex-direction:column;gap:10px;}
+.quiz-option{padding:12px;border-radius:10px;border:1px solid #333;background:#1a1a1a;color:#e0e0e0;font-size:0.9rem;cursor:pointer;transition:all 0.2s;}
+.quiz-option:hover{border-color:#39ff14;background:#1f1f1f;}
+.quiz-option.correct{background:#39ff14;color:#0a0a0a;border-color:#39ff14;}
+.quiz-option.wrong{background:#ff4444;color:#fff;border-color:#ff4444;}
+.quiz-score{color:#39ff14;font-size:1.1rem;margin-top:16px;}
+.quiz-next{margin-top:16px;padding:10px 24px;border-radius:20px;border:none;background:#39ff14;color:#0a0a0a;font-weight:600;cursor:pointer;font-size:0.9rem;}
+.quiz-close{position:absolute;top:20px;right:20px;color:#888;font-size:1.5rem;cursor:pointer;}
+
+/* Footer */
+.footer{text-align:center;padding:20px;color:#333;font-size:0.7rem;border-top:1px solid #1a1a1a;margin-top:40px;}
+
+/* No Results */
+.no-results{text-align:center;padding:60px 20px;color:#555;}
+.no-results-icon{font-size:3rem;margin-bottom:12px;}
+
+/* Responsive */
+@media(max-width:600px){
+  .card-grid{grid-template-columns:1fr;padding:12px;}
+  .header h1{font-size:1.1rem;}
+  .controls{padding:8px 12px;}
+}
+
+/* ============================================ */
+/* SIDEBAR LAYOUT                              */
+/* ============================================ */
+.app-layout {
+  display: flex;
+  height: calc(100vh - 60px);
+  margin-top: 60px;
+}
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  background: #0a0a0a;
+  border-right: 1px solid #1a3a1a;
+  overflow-y: auto;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sidebar h3 {
+  color: #39ff14;
+  font-size: 13px;
+  margin: 10px 0 5px 0;
+  font-family: 'Share Tech Mono', monospace;
+}
+.sidebar .cat-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: #111;
+  color: #aaa;
+  border: 1px solid #222;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'Share Tech Mono', monospace;
+  transition: all 0.2s;
+}
+.sidebar .cat-btn:hover {
+  background: #1a3a1a;
+  color: #39ff14;
+  border-color: #39ff14;
+}
+.sidebar .cat-btn.active {
+  background: #39ff14;
+  color: #000;
+  border-color: #39ff14;
+  font-weight: bold;
+}
+.sidebar .search-box {
+  width: 100%;
+  padding: 8px 12px;
+  background: #111;
+  color: #39ff14;
+  border: 1px solid #333;
+  border-radius: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  outline: none;
+}
+.sidebar .search-box:focus {
+  border-color: #39ff14;
+}
+.sidebar .action-btn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+.sidebar .quiz-btn {
+  background: #ff6600;
+  color: #000;
+}
+.sidebar .quiz-btn:hover {
+  background: #ff8833;
+}
+.sidebar .random-btn {
+  background: #333;
+  color: #39ff14;
+  border: 1px solid #39ff14;
+}
+.sidebar .random-btn:hover {
+  background: #1a3a1a;
+}
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+  .sidebar .counter {
+    color: #666;
+    font-size: 11px;
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+.card.selected{border:2px solid #39ff14;box-shadow:0 0 12px rgba(57,255,20,0.4);}
+.selected-bar{position:fixed;bottom:0;left:0;right:0;height:40px;background:#1a1a2e;border-top:1px solid #39ff14;display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:999;display:none;}
+.selected-bar.active{display:flex;}
+.selected-bar span{color:#39ff14;font-family:'Share Tech Mono',monospace;font-size:13px;}
+.selected-bar button{background:#39ff14;color:#0a0a0a;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-weight:bold;margin-left:8px;}
+.selected-bar button.clear-btn{background:#ff4444;}
+
+
+.version-clickable{cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;}
+.version-clickable:hover{color:#00ff41;}
+.changelog-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;justify-content:center;align-items:center;}
+.changelog-overlay.active{display:flex;}
+.changelog-box{background:#1a1a2e;border:1px solid #00ff41;border-radius:12px;padding:30px;max-width:520px;width:90%;max-height:80vh;overflow-y:auto;color:#e0e0e0;font-family:'Segoe UI',sans-serif;}
+.changelog-box h2{color:#00ff41;margin-top:0;font-size:1.3em;}
+.changelog-box h3{color:#00ff41;font-size:1.05em;margin-bottom:6px;}
+.changelog-box ul{padding-left:20px;margin-top:4px;}
+.changelog-box li{margin-bottom:4px;font-size:0.9em;}
+.changelog-close{float:right;background:none;border:1px solid #00ff41;color:#00ff41;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.85em;}
+.changelog-close:hover{background:#00ff41;color:#1a1a2e;}
+
+</style>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+<script data-goatcounter="https://meridi-lingo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<!-- Boot Screen -->
+<div class="boot-screen" id="bootScreen">
+  <div class="boot-icon" id="bootIcon"></div>
+  <div class="boot-title">MeridiLingo</div>
+  <div class="boot-subtitle">Language Evolution Explorer</div>
+  <div class="boot-bar"><div class="boot-bar-fill" id="bootBar"></div></div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <h1>MeridiLingo</h1>
+  <div class="header-right">
+    <span class="counter-badge" id="counterBadge">300 expressions</span>
+    <span class="version-badge version-clickable" onclick="document.getElementById('changelogModal').classList.add('active')">v1.1.1</span>
+  </div>
+</div>
+
+<div class="app-layout">
+  <div class="sidebar" id="sidebar">
+    <input type="text" class="search-box" id="searchBox" placeholder="Search expressions..." oninput="filterCards()">
+    <div class="counter" id="counter">300 expressions</div>
+    <h3>Categories</h3>
+    <button class="cat-btn active" onclick="setCategory('all')">All</button>
+    <div id="categoryList"></div>
+    <h3>Tools</h3>
+    <button class="action-btn quiz-btn" onclick="startQuiz()">Quiz Mode</button>
+    <button class="action-btn random-btn" onclick="showRandom()">Random Card</button>
+    <h3>Sort</h3>
+    <button class="cat-btn" onclick="sortCards('az')">A → Z</button>
+    <button class="cat-btn" onclick="sortCards('za')">Z → A</button>
+    <button class="cat-btn" onclick="sortCards('old')">Oldest First</button>
+    <button class="cat-btn" onclick="sortCards('new')">Newest First</button>
+    <button class="cat-btn" onclick="sortCards('shuffle')">Shuffle</button>
+    <h3>Era Filter</h3>
+    <div id="eraList"></div>
+  </div>
+  <div class="main-content">
+    <div class="card-grid" id="cardGrid"></div>
+    <div class="no-results" id="noResults" style="display:none;">
+      <div class="no-results-icon">Search</div>
+      <div>No expressions found. Try a different search!</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Overlay -->
+<div class="quiz-overlay" id="quizOverlay">
+  <div class="quiz-card">
+    <span class="quiz-close" onclick="closeQuiz()">x</span>
+    <div class="quiz-question" id="quizQuestion"></div>
+    <div class="quiz-options" id="quizOptions"></div>
+    <div class="quiz-score" id="quizScore"></div>
+    <button class="quiz-next" id="quizNext" onclick="nextQuiz()" style="display:none;">Next</button>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  MeridiLingo <span class="version-clickable" onclick="document.getElementById('changelogModal').classList.add('active')">v1.1.1</span> | No Ads. No Subscriptions. Just Words. | Meridi Brand
+</div>
+
+
+<div id="changelogModal" class="changelog-overlay" onclick="if(event.target===this)this.classList.remove('active')">
+  <div class="changelog-box">
+    <button class="changelog-close" onclick="document.getElementById('changelogModal').classList.remove('active')">✕ Close</button>
+    <h2>📜 CHANGELOG</h2>
+
+    <h3>🔥 v1.1.1 — 2026-11-01</h3>
+    <ul>
+      <li>Added 135 new expressions (315 → 450)</li>
+      <li>New Category: Japanese Onomatopoeia</li>
+      <li>New Category: Japanese to English</li>
+      <li>New Category: Wasei-Eigo</li>
+      <li>New Category: Anime & Manga</li>
+      <li>Added expressions to existing categories</li>
+      <li>Fixed: Equalizer missing example sentence</li>
+    </ul>
+    <hr style="border:none;border-top:1px solid #333;margin:12px 0;">
+
+    <h3>🔓 v1.1.0 — 2026-11-01</h3>
+    <ul>
+      <li>Switched from exe to HTML (free to use)</li>
+      <li>Added footer with product links</li>
+    </ul>
+    <hr style="border:none;border-top:1px solid #333;margin:12px 0;">
+
+    <h3>🚀 v1.0.0 — 2026-10-15</h3>
+    <ul>
+      <li>Initial release (exe version)</li>
+      <li>315 expressions / 20 categories</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+
+// ============================================================
+// MERIDI LINGO v1.1.1 — JavaScript Engine
+// ============================================================
+
+var LINGO_DATA = [
+
+  {"word":"Tubular","meaning":"Awesome, amazing","example":"Dude, that wave was totally tubular!","category":"Dead Slang","era":"1980s","source":"Surf Culture","trivia":"From the tube shape of a perfect wave"},
+  {"word":"Da bomb","meaning":"The best, amazing","example":"This pizza is da bomb!","category":"Dead Slang","era":"1990s","source":"Street Slang","trivia":"Peaked in the late 90s, now sounds dated"},
+  {"word":"Talk to the hand","meaning":"I don't want to hear it","example":"Talk to the hand, cause the face ain't listening.","category":"Dead Slang","era":"1990s","source":"Pop Culture","trivia":"Iconic 90s dismissal gesture"},
+  {"word":"All that and a bag of chips","meaning":"Someone who thinks highly of themselves","example":"She thinks she's all that and a bag of chips.","category":"Dead Slang","era":"1990s","source":"TV/Movies","trivia":"Peak 90s expression, rarely heard today"},
+  {"word":"Gag me with a spoon","meaning":"That's disgusting","example":"He asked her out? Gag me with a spoon!","category":"Dead Slang","era":"1980s","source":"Valley Girl","trivia":"Frank Zappa's Valley Girl made it famous"},
+  {"word":"The bee's knees","meaning":"The best, excellent","example":"This cocktail is the bee's knees!","category":"Dead Slang","era":"1920s","source":"Jazz Age","trivia":"Bees carry pollen in knee sacks — the good stuff"},
+  {"word":"Groovy","meaning":"Cool, excellent","example":"That's a groovy tune, man.","category":"Dead Slang","era":"1960s","source":"Hippie Culture","trivia":"Austin Powers brought it back ironically"},
+  {"word":"Radical","meaning":"Extremely cool","example":"That skateboard trick was radical!","category":"Dead Slang","era":"1980s","source":"Skate/Surf Culture","trivia":"Shortened to 'rad' which still survives today"},
+  {"word":"Far out","meaning":"Amazing, unbelievable","example":"You met the president? Far out!","category":"Dead Slang","era":"1960s","source":"Hippie Movement","trivia":"Originally jazz slang from the 1950s"},
+  {"word":"Gnarly","meaning":"Extreme, intense","example":"That wipeout was gnarly, dude.","category":"Dead Slang","era":"1970s","source":"Surf Culture","trivia":"Can mean both awesome and terrible depending on context"},
+  {"word":"Bodacious","meaning":"Remarkable, audacious","example":"That was a bodacious move!","category":"Dead Slang","era":"1980s","source":"Bill & Ted","trivia":"Blend of bold and audacious"},
+  {"word":"Ghost","meaning":"To suddenly cut off all communication","example":"He ghosted me after three dates.","category":"Modern Slang","era":"2010s","source":"Dating Culture","trivia":"Oxford added it in 2017"},
+  {"word":"Flex","meaning":"To show off","example":"Nice car — no need to flex.","category":"Modern Slang","era":"2010s","source":"Hip Hop","trivia":"From flexing muscles to showing wealth"},
+  {"word":"Lowkey","meaning":"Secretly, subtly","example":"I lowkey love that song.","category":"Modern Slang","era":"2010s","source":"Internet","trivia":"Opposite is highkey — openly/obviously"},
+  {"word":"Salty","meaning":"Bitter or upset","example":"Don't be salty just because you lost.","category":"Modern Slang","era":"2010s","source":"Gaming/Internet","trivia":"Originally 1930s jazz slang, revived online"},
+  {"word":"Vibe check","meaning":"Assessing someone's mood or energy","example":"Hold on, let me do a vibe check.","category":"Modern Slang","era":"2020s","source":"TikTok","trivia":"Can be positive or threatening depending on context"},
+  {"word":"Bussin","meaning":"Really good, especially food","example":"This ramen is bussin!","category":"Modern Slang","era":"2020s","source":"TikTok/AAVE","trivia":"From African American Vernacular English"},
+  {"word":"No cap","meaning":"No lie, for real","example":"That movie was amazing, no cap.","category":"Modern Slang","era":"2020s","source":"Hip Hop/Internet","trivia":"Cap = lie, No cap = truth"},
+  {"word":"Simp","meaning":"Someone who does too much for a person they like","example":"He bought her flowers every day — total simp.","category":"Modern Slang","era":"2020s","source":"Internet","trivia":"Debated origin — possibly from simpleton or simpering"},
+  {"word":"Bet","meaning":"Okay, sounds good, agreement","example":"Wanna grab lunch? Bet.","category":"Modern Slang","era":"2010s","source":"AAVE","trivia":"Short for you bet — evolved into one-word agreement"},
+  {"word":"Slaps","meaning":"Something that's really good","example":"This playlist slaps!","category":"Modern Slang","era":"2010s","source":"Music Culture","trivia":"Originally about music, now used for anything good"},
+  {"word":"Rizz","meaning":"Charisma, charm, ability to attract","example":"He's got serious rizz.","category":"Modern Slang","era":"2020s","source":"Internet/Twitch","trivia":"Oxford Word of the Year 2023"},
+  {"word":"Yeet","meaning":"To throw something with force","example":"He yeeted the ball across the field.","category":"Modern Slang","era":"2010s","source":"Vine/Internet","trivia":"Started from a viral Vine video in 2014"},
+  {"word":"I'll be back.","meaning":"A promise to return","example":"The Terminator's iconic exit line.","category":"Movie Quotes","era":"1980s","source":"The Terminator (1984)","trivia":"Schwarzenegger almost said 'I will be back' but James Cameron insisted on the contraction"},
+  {"word":"Here's looking at you, kid.","meaning":"A toast to someone special","example":"Rick's farewell to Ilsa at the airport.","category":"Movie Quotes","era":"1940s","source":"Casablanca (1942)","trivia":"Humphrey Bogart improvised this line during a card game scene"},
+  {"word":"May the Force be with you.","meaning":"Good luck, stay strong","example":"Used as a blessing before battle.","category":"Movie Quotes","era":"1970s","source":"Star Wars (1977)","trivia":"Inspired by 'May God be with you' — became a cultural phenomenon"},
+  {"word":"You talking to me?","meaning":"Confrontational challenge","example":"Travis Bickle practicing in the mirror.","category":"Movie Quotes","era":"1970s","source":"Taxi Driver (1976)","trivia":"Robert De Niro improvised this entire scene"},
+  {"word":"Houston, we have a problem.","meaning":"Something has gone wrong","example":"Used in everyday life when things go sideways.","category":"Movie Quotes","era":"1990s","source":"Apollo 13 (1995)","trivia":"Actual quote was 'Houston, we've had a problem' — movie changed the tense"},
+  {"word":"To infinity and beyond!","meaning":"No limits, unlimited potential","example":"Buzz Lightyear's signature catchphrase.","category":"Movie Quotes","era":"1990s","source":"Toy Story (1995)","trivia":"Tim Allen ad-libbed the delivery style"},
+  {"word":"Life is like a box of chocolates.","meaning":"You never know what you're going to get","example":"Forrest Gump's mama's wisdom.","category":"Movie Quotes","era":"1990s","source":"Forrest Gump (1994)","trivia":"In the novel, the quote is 'Life is a box of chocolates' — the movie added 'like'"},
+  {"word":"I see dead people.","meaning":"Revelation of supernatural ability","example":"Cole's whispered confession to Malcolm.","category":"Movie Quotes","era":"1990s","source":"The Sixth Sense (1999)","trivia":"Haley Joel Osment was only 11 when he delivered this iconic line"},
+  {"word":"Say hello to my little friend!","meaning":"Introducing a weapon or surprise","example":"Tony Montana's last stand.","category":"Movie Quotes","era":"1980s","source":"Scarface (1983)","trivia":"Al Pacino improvised the intensity of the delivery"},
+  {"word":"You can't handle the truth!","meaning":"The truth is too harsh for you","example":"Colonel Jessup's courtroom outburst.","category":"Movie Quotes","era":"1990s","source":"A Few Good Men (1992)","trivia":"Jack Nicholson nailed it in one take"},
+  {"word":"In case I don't see you — good afternoon, good evening, and good night!","meaning":"A cheerful farewell covering all times of day","example":"Truman's signature sign-off to his neighbors.","category":"Movie Quotes","era":"1990s","source":"The Truman Show (1998)","trivia":"Jim Carrey improvised the delivery — became the film's most quoted line"},
+  {"word":"B-E-A-UTIFUL!","meaning":"Exaggerated way to say beautiful","example":"Spelling it out for emphasis.","category":"Movie Quotes","era":"2000s","source":"Bruce Almighty (2003)","trivia":"Jim Carrey's delivery made this a pop culture catchphrase"},
+  {"word":"Alrighty then!","meaning":"Exaggerated agreement or acceptance","example":"Ace Ventura's signature response.","category":"Movie Quotes","era":"1990s","source":"Ace Ventura (1994)","trivia":"Jim Carrey created this catchphrase — it wasn't in the original script"},
+  {"word":"I'm gonna make him an offer he can't refuse.","meaning":"A proposal too good (or threatening) to decline","example":"Don Corleone's business philosophy.","category":"Movie Quotes","era":"1970s","source":"The Godfather (1972)","trivia":"Marlon Brando stuffed cotton in his cheeks for the raspy voice"},
+  {"word":"It's no fun when the rabbit has the gun, is it?","meaning":"Tables have turned — not fun when the powerless fight back","example":"Alonzo realizing he's lost control.","category":"Movie Quotes","era":"2000s","source":"Training Day (2001)","trivia":"Denzel Washington won the Oscar for this role"},
+  {"word":"Get busy living, or get busy dying.","meaning":"Choose to live fully or accept defeat","example":"Andy's philosophy in Shawshank.","category":"Movie Quotes","era":"1990s","source":"The Shawshank Redemption (1994)","trivia":"The film flopped at box office but became the highest-rated film on IMDb"},
+  {"word":"Go ahead, make my day.","meaning":"I dare you to try","example":"Dirty Harry challenging a criminal.","category":"Movie Quotes","era":"1980s","source":"Sudden Impact (1983)","trivia":"President Reagan quoted this line to Congress in 1985"},
+  {"word":"Frankly, my dear, I don't give a d**n.","meaning":"I simply don't care","example":"Rhett Butler's famous farewell to Scarlett.","category":"Movie Quotes","era":"1930s","source":"Gone with the Wind (1939)","trivia":"The word was controversial — the studio was fined $5,000 for using it"},
+  {"word":"Rosebud.","meaning":"A symbol of lost innocence and childhood","example":"Kane's mysterious last word.","category":"Movie Quotes","era":"1940s","source":"Citizen Kane (1941)","trivia":"Often called the greatest movie mystery — it was his childhood sled"},
+  {"word":"You just messed up your Ferrari!","meaning":"You ruined something extremely valuable","example":"Look what you did — you just messed up your Ferrari!","category":"Movie Quotes","era":"2000s","source":"The Rock (2003)","trivia":"Modified for clean version"},
+  {"word":"How colorful.","meaning":"Sarcastic British understatement for something vulgar","example":"Simon Gruber's dry response to McClane's insults.","category":"Movie Quotes","era":"1990s","source":"Die Hard 3 (1995)","trivia":"Jeremy Irons' British delivery made this the perfect cultural clash moment"},
+  {"word":"How you doin'?","meaning":"Flirtatious greeting","example":"Joey's signature pickup line.","category":"TV & Sitcom","era":"1990s","source":"Friends","trivia":"Matt LeBlanc improvised this in rehearsal"},
+  {"word":"Pivot! PIVOT!","meaning":"Turn or rotate something","example":"Ross screaming while moving a couch.","category":"TV & Sitcom","era":"1990s","source":"Friends","trivia":"David Schwimmer's delivery made this one of TV's funniest moments"},
+  {"word":"That's what she said.","meaning":"Turning innocent statements into innuendo","example":"Michael Scott's go-to response.","category":"TV & Sitcom","era":"2000s","source":"The Office","trivia":"Steve Carell often improvised the timing"},
+  {"word":"D'oh!","meaning":"Expression of frustration","example":"Homer's reaction to everything.","category":"TV & Sitcom","era":"1990s","source":"The Simpsons","trivia":"Added to Oxford English Dictionary in 2001"},
+  {"word":"Bazinga!","meaning":"Gotcha! (after a prank or joke)","example":"Sheldon's signature catchphrase.","category":"TV & Sitcom","era":"2000s","source":"The Big Bang Theory","trivia":"Jim Parsons said it over 100 times across the series"},
+  {"word":"Suit up!","meaning":"Get dressed formally, get ready","example":"Barney's command before a night out.","category":"TV & Sitcom","era":"2000s","source":"How I Met Your Mother","trivia":"Neil Patrick Harris made suits cool again"},
+  {"word":"Cool cool cool cool cool.","meaning":"Processing anxiety while pretending to be calm","example":"Jake's response to stressful situations.","category":"TV & Sitcom","era":"2010s","source":"Brooklyn Nine-Nine","trivia":"Andy Samberg's delivery varies — sometimes fast, sometimes slow"},
+  {"word":"Legen... wait for it... dary!","meaning":"Something epic and unforgettable","example":"Barney's dramatic way of saying legendary.","category":"TV & Sitcom","era":"2000s","source":"How I Met Your Mother","trivia":"The pause became longer as the series progressed"},
+  {"word":"Winter is coming.","meaning":"Prepare for hard times ahead","example":"The Stark family motto.","category":"TV & Sitcom","era":"2010s","source":"Game of Thrones","trivia":"Became a universal metaphor for impending challenges"},
+  {"word":"Say my name.","meaning":"Acknowledge who I really am","example":"Walter White demanding respect.","category":"TV & Sitcom","era":"2010s","source":"Breaking Bad","trivia":"Bryan Cranston's transformation from teacher to Heisenberg in one scene"},
+  {"word":"Just one more thing...","meaning":"A seemingly casual but crucial question","example":"Columbo's signature detective technique.","category":"TV & Sitcom","era":"1970s","source":"Columbo","trivia":"Peter Falk improvised this line — it became TV's most famous detective trick"},
+  {"word":"I majored in lightning rounds.","meaning":"I'm quick with answers under pressure","example":"Chandler's witty response about his skills.","category":"TV & Sitcom","era":"1990s","source":"Friends","trivia":"Matthew Perry's comedic timing made Chandler the fan favorite"},
+  {"word":"Dibbs!","meaning":"I claim it first!","example":"Randy touching Earl to transfer bad luck.","category":"TV & Sitcom","era":"2000s","source":"My Name is Earl","trivia":"Randy's childlike logic made this a running gag throughout the series"},
+  {"word":"It's nine o'clock on a Saturday...","meaning":"Opening line of Piano Man by Billy Joel","example":"Castle singing at a crime scene.","category":"TV & Sitcom","era":"2010s","source":"Castle","trivia":"Nathan Fillion actually sang this — showcasing Castle's playful personality"},
+  {"word":"If you smell what The Rock is cooking!","meaning":"Do you understand what I'm saying?","example":"The Rock's signature catchphrase.","category":"Pro Wrestling","era":"1990s","source":"WWF/WWE","trivia":"Dwayne Johnson created this — nobody ever found out what he was cooking"},
+  {"word":"Austin 3:16 says I just whipped your a**!","meaning":"Declaration of dominance","example":"Stone Cold's iconic King of the Ring speech.","category":"Pro Wrestling","era":"1990s","source":"WWF/WWE","trivia":"This one promo launched the Attitude Era and sold millions of t-shirts"},
+  {"word":"Whatcha gonna do, brother?","meaning":"What are you going to do about it?","example":"Hulk Hogan challenging opponents.","category":"Pro Wrestling","era":"1980s","source":"WWF","trivia":"Hogan added 'brother' to everything — it became his verbal signature"},
+  {"word":"Rest in peace.","meaning":"Your end is near","example":"The Undertaker's warning to opponents.","category":"Pro Wrestling","era":"1990s","source":"WWF/WWE","trivia":"The Undertaker maintained his character for 30 years — longest commitment in wrestling"},
+  {"word":"Woo!","meaning":"Expression of excitement and confidence","example":"Ric Flair's signature exclamation.","category":"Pro Wrestling","era":"1980s","source":"NWA/WCW/WWF","trivia":"Flair claims he's done over 10,000 Woos in his career"},
+  {"word":"And that's the bottom line, cause Stone Cold said so!","meaning":"End of discussion, my word is final","example":"Stone Cold closing every promo.","category":"Pro Wrestling","era":"1990s","source":"WWF/WWE","trivia":"Always followed by a beer bash celebration"},
+  {"word":"Have a nice day!","meaning":"Cheerful farewell (often sarcastic in context)","example":"Mick Foley's signature catchphrase.","category":"Pro Wrestling","era":"1990s","source":"WWF/WWE","trivia":"His autobiography 'Have a Nice Day' became a NYT bestseller"},
+  {"word":"You still got it!","meaning":"You haven't lost your skills","example":"Crowd chanting to returning legends.","category":"Pro Wrestling","era":"2000s","source":"WWE/AEW","trivia":"One of wrestling's most respectful crowd chants"},
+  {"word":"One more for the Bad Guy!","meaning":"One last drink for the villain","example":"Scott Hall's signature toast.","category":"Pro Wrestling","era":"1990s","source":"WCW/nWo","trivia":"Hall's 'Bad Guy' persona was inspired by Scarface's Tony Montana"},
+  {"word":"It's true! It's damn true!","meaning":"Emphatic confirmation of a fact","example":"Kurt Angle insisting on his Olympic credentials.","category":"Pro Wrestling","era":"2000s","source":"WWF/WWE","trivia":"Angle really did win an Olympic gold medal with a broken neck"},
+  {"word":"The best there is, the best there was, and the best there ever will be.","meaning":"Ultimate declaration of being the greatest","example":"Bret Hart's signature introduction.","category":"Pro Wrestling","era":"1990s","source":"WWF/WWE","trivia":"Uses past, present, and future tense — a grammar lesson in one catchphrase"},
+  {"word":"This is where the big boys play, huh? We ain't here to play!","meaning":"We're here to dominate, not just participate","example":"The Outsiders invading WCW.","category":"Pro Wrestling","era":"1990s","source":"WCW/nWo","trivia":"This promo launched the nWo angle — changed wrestling forever"},
+  {"word":"You can't see me!","meaning":"I'm invisible to you, you can't compete","example":"John Cena waving his hand in front of his face.","category":"Pro Wrestling","era":"2000s","source":"WWE","trivia":"Became a massive internet meme — 'invisible John Cena'"},
+  {"word":"Yeet!","meaning":"Exclamation when throwing something with force","example":"Jey Uso's signature move call.","category":"Pro Wrestling","era":"2020s","source":"WWE","trivia":"Borrowed from internet slang — the crowd yeets along with him"},
+  {"word":"Let's get ready to rumble!","meaning":"Get prepared for the main event","example":"Michael Buffer's iconic ring announcement.","category":"Pro Wrestling","era":"1980s","source":"Boxing/Wrestling","trivia":"Buffer trademarked this phrase — earned over $400 million from licensing"},
+  {"word":"Doctor of Thuganomics","meaning":"Expert in street-smart attitude","example":"John Cena's early rapper gimmick persona.","category":"Pro Wrestling","era":"2000s","source":"WWE","trivia":"Cena actually released a rap album that went platinum"},
+  {"word":"I'm the one behind the one in 21 and 1.","meaning":"I'm the one who ended The Undertaker's undefeated streak","example":"Brock Lesnar's boast after WrestleMania 30.","category":"Pro Wrestling","era":"2010s","source":"WWE","trivia":"Lesnar broke The Undertaker's legendary 21-0 WrestleMania streak"},
+  {"word":"Limousine ridin', jet flyin', kiss stealin', wheelin' dealin' son of a gun!","meaning":"Living the ultimate luxury lifestyle","example":"Ric Flair's legendary self-description.","category":"Pro Wrestling","era":"1980s","source":"NWA/WCW","trivia":"Flair lived this lifestyle for real — both a blessing and a curse"},
+  {"word":"Fingerpoke of Doom","meaning":"A betrayal disguised as something trivial","example":"Hogan poked Nash and pinned him — WCW's downfall moment.","category":"Pro Wrestling","era":"1990s","source":"WCW","trivia":"January 4, 1999 — many consider this the beginning of the end for WCW"},
+  {"word":"20 years in the making!","meaning":"Something long awaited finally happening","example":"Hulk Hogan vs. Vince McMahon at WrestleMania XIX.","category":"Pro Wrestling","era":"2000s","source":"WWE","trivia":"Referenced the real-life steroid trial tensions between Hogan and McMahon"},
+  {"word":"Bury the hatchet","meaning":"To make peace, forgive past conflicts","example":"HBK and Bret Hart's reconciliation after the Montreal Screwjob.","category":"Pro Wrestling","era":"2000s","source":"WWE","trivia":"Their real-life reconciliation took over 12 years"},
+  {"word":"Silver spoon in your mouth","meaning":"Born into wealth and privilege","example":"He was born with a silver spoon in his mouth.","category":"Idioms & Phrases","era":"Classic","source":"English Proverb","trivia":"The Rock used this in a promo — dates back to the 1700s"},
+  {"word":"Skeleton in the closet","meaning":"A hidden secret or scandal","example":"Every family has a skeleton in the closet.","category":"Idioms & Phrases","era":"Classic","source":"English Proverb","trivia":"First recorded use in 1816 by a British journalist"},
+  {"word":"Bone to pick","meaning":"A complaint or issue to discuss","example":"I've got a bone to pick with you about yesterday.","category":"Idioms & Phrases","era":"Classic","source":"English Idiom","trivia":"From dogs fighting over a bone — dates to the 1500s"},
+  {"word":"Follow my hunch","meaning":"Trust my gut feeling, follow my intuition","example":"I don't have proof, but I'm going to follow my hunch.","category":"Idioms & Phrases","era":"Classic","source":"English Idiom","trivia":"Hunch also means a rounded back posture"},
+  {"word":"Rain check","meaning":"Postpone to another time","example":"Can I take a rain check on dinner?","category":"Idioms & Phrases","era":"Classic","source":"Baseball","trivia":"Originally a ticket stub for a rained-out baseball game in the 1880s"},
+  {"word":"Steal your spotlight","meaning":"Take attention away from someone","example":"Don't steal my spotlight at the presentation.","category":"Idioms & Phrases","era":"Classic","source":"Theater","trivia":"From actual spotlights in theater — stepping into someone else's light"},
+  {"word":"I scratch your back, you scratch mine","meaning":"Mutual help, reciprocal favor","example":"Help me move and I'll help you paint — I scratch your back, you scratch mine.","category":"Idioms & Phrases","era":"Classic","source":"English Proverb","trivia":"Dates back to the 1600s — originally about monkeys grooming each other"},
+  {"word":"Read my lips","meaning":"Listen carefully, I mean exactly what I say","example":"Read my lips: no new taxes.","category":"Idioms & Phrases","era":"1980s","source":"Politics","trivia":"George H.W. Bush's 1988 campaign promise — became infamous when he raised taxes"},
+  {"word":"Pitch black","meaning":"Complete darkness, no light at all","example":"The cave was pitch black — I couldn't see my hand.","category":"Idioms & Phrases","era":"Classic","source":"English","trivia":"From 'pitch' — a dark sticky substance used to waterproof ships"},
+  {"word":"My mouth's watering","meaning":"Something looks or smells delicious","example":"That steak is making my mouth water.","category":"Everyday Expressions","era":"Classic","source":"Scent of a Woman","trivia":"A physical response — saliva production increases when you see appetizing food"},
+  {"word":"Hump Day","meaning":"Wednesday — the middle of the work week","example":"Happy Hump Day! We're halfway through.","category":"Everyday Expressions","era":"2000s","source":"Office Culture","trivia":"Wednesday is the 'hump' you get over before the weekend downhill"},
+  {"word":"Muggy","meaning":"Hot and humid weather","example":"It's so muggy today I'm drenched in sweat.","category":"Weather","era":"Classic","source":"English","trivia":"From Scandinavian 'mugga' meaning drizzle — perfect for describing Tokyo summers"},
+  {"word":"Heat stroke","meaning":"Dangerous overheating of the body","example":"Stay hydrated or you'll get heat stroke.","category":"Weather","era":"Classic","source":"Medical","trivia":"Body temperature rises above 104F/40C — a medical emergency"},
+  {"word":"Drizzle","meaning":"Light, fine rain","example":"It's just a drizzle, you don't need an umbrella.","category":"Weather","era":"Classic","source":"English","trivia":"Different from mist (suspended droplets) — drizzle actually falls"},
+  {"word":"Downpour","meaning":"Very heavy rain","example":"We got caught in a sudden downpour.","category":"Weather","era":"Classic","source":"English","trivia":"Japanese equivalent is guerrilla rain (gerira gouu)"},
+  {"word":"Breeze","meaning":"A gentle, pleasant wind","example":"There's a nice breeze coming off the ocean.","category":"Weather","era":"Classic","source":"English","trivia":"A 'breeze' in slang also means something easy — 'That test was a breeze'"},
+  {"word":"Break a leg","meaning":"Good luck (theater superstition)","example":"You're going on stage? Break a leg!","category":"Idioms & Phrases","era":"1920s","trivia":"Theater tradition — saying 'good luck' is considered bad luck"},
+  {"word":"Throw shade","meaning":"Subtly disrespect someone","example":"She just threw shade at her ex on social media.","category":"Modern Slang","era":"2010s","trivia":"Popularized by Paris Is Burning documentary"},
+  {"word":"Clap back","meaning":"A sharp, witty response to criticism","example":"Her clap back to the haters went viral.","category":"Modern Slang","era":"2010s","trivia":"Ja Rule's 2003 song 'Clap Back' helped popularize the term"},
+  {"word":"It's giving","meaning":"It resembles or has the energy of","example":"That outfit? It's giving main character energy.","category":"Modern Slang","era":"2020s","trivia":"Popularized by Black and LGBTQ+ communities on social media"},
+  {"word":"Caught in 4K","meaning":"Caught red-handed with clear evidence","example":"He denied it but got caught in 4K on camera.","category":"Modern Slang","era":"2020s","trivia":"References high-resolution video capturing every detail"},
+  {"word":"Living rent free","meaning":"Can't stop thinking about something","example":"That song is living rent free in my head.","category":"Modern Slang","era":"2020s","trivia":"The phrase implies someone occupies your thoughts without paying"},
+  {"word":"Touch grass","meaning":"Go outside, disconnect from the internet","example":"You've been online for 12 hours. Go touch grass.","category":"Modern Slang","era":"2020s","trivia":"Used to tell someone they need real-world perspective"},
+  {"word":"Main character energy","meaning":"Acting like the protagonist of your own story","example":"She walked in with main character energy.","category":"Modern Slang","era":"2020s","trivia":"Inspired by TikTok trend of narrating life like a movie"},
+  {"word":"Cat's pajamas","meaning":"Something wonderful or impressive","example":"That jazz band is the cat's pajamas!","category":"Dead Slang","era":"1920s","trivia":"Coined during the same era as 'bee's knees'"},
+  {"word":"Under the weather","meaning":"Feeling sick or unwell","example":"I'm feeling a bit under the weather today.","category":"Weather","era":"Classic","trivia":"Nautical origin — sick sailors went below deck to escape weather"},
+  {"word":"It's raining cats and dogs","meaning":"Extremely heavy rain","example":"Don't go out now — it's raining cats and dogs!","category":"Weather","era":"Classic","trivia":"Origin debated — possibly from 17th century London flooding"},
+  {"word":"Pole Position","meaning":"First place on the starting grid","example":"Hamilton took pole position with a stunning lap.","category":"Sports","era":"Classic","trivia":"In F1, commonly abbreviated as P1 — 'pole position' is the formal term"},
+  {"word":"DH (Designated Hitter)","meaning":"A player who bats in place of the pitcher","example":"Ohtani is the greatest DH in baseball history.","category":"Abbreviations","era":"Classic","trivia":"The DH rule was introduced in the American League in 1973"},
+  {"word":"DL (Disabled List)","meaning":"Injured reserve list in baseball","example":"He's been placed on the 60-day DL.","category":"Abbreviations","era":"Classic","trivia":"Now officially called IL (Injured List) since 2019"},
+  {"word":"Nasty tackle","meaning":"A dangerous or reckless challenge in football","example":"That was a nasty tackle — should be a red card!","category":"Sports","era":"Classic","trivia":"Can result in a straight red card under FIFA rules"},
+  {"word":"Scissors kick","meaning":"An acrobatic overhead kick","example":"What a scissors kick! Goal of the season!","category":"Sports","era":"Classic","trivia":"Also called a bicycle kick — one of football's most spectacular moves"},
+  {"word":"VAR","meaning":"Video Assistant Referee","example":"VAR is checking for a possible handball.","category":"Sports","era":"2010s","trivia":"Introduced to the World Cup in 2018 — still controversial"},
+  {"word":"Equalizer","meaning":"A goal that ties the score","example":"What an equalizer in the 90th minute!","category":"Sports","era":"Classic","trivia":"Often the most dramatic moment in a football match"},
+  {"word":"No power!","meaning":"Engine has lost power","example":"No power! The engine is gone!","category":"Sports","era":"2010s","trivia":"Common F1 radio complaint — Ricciardo's Monaco 2016 was heartbreaking"},
+  {"word":"Box box box","meaning":"Come into the pit lane for a pit stop","example":"Box box box — we're switching to soft tires.","category":"Sports","era":"Classic","trivia":"F1 teams repeat 'box' three times for clarity over radio static"},
+  {"word":"Get in there!","meaning":"Celebration of a race win","example":"Get in there, Lewis! What a drive!","category":"Sports","era":"2010s","trivia":"Bono's iconic radio call to Lewis Hamilton after victories"},
+  {"word":"Lights out and away we go","meaning":"The race has started","example":"It's lights out and away we go at Monza!","category":"Sports","era":"2000s","trivia":"Martin Brundle and David Croft's signature F1 race start call"},
+  {"word":"Hustle, Loyalty, Respect","meaning":"John Cena's motto and brand","example":"Hustle, Loyalty, Respect — the Cenation way of life.","category":"Pro Wrestling","era":"2000s","trivia":"Became one of WWE's most successful merchandise slogans ever"},
+  {"word":"Shape of You","meaning":"Ed Sheeran hit about attraction","example":"I'm in love with the shape of you.","category":"Music & Lyrics","era":"2010s","trivia":"One of the most streamed songs ever — great for modern English"},
+  {"word":"Bohemian Rhapsody","meaning":"Queen's epic rock opera","example":"Is this the real life? Is this just fantasy?","category":"Music & Lyrics","era":"1970s","trivia":"Six-minute masterpiece that broke all radio format rules"},
+  {"word":"Zombie","meaning":"The Cranberries protest song","example":"In your head, in your head, zombie, zombie.","category":"Music & Lyrics","era":"1990s","trivia":"Written about the 1993 IRA bombing in Warrington, England"},
+  {"word":"Kings & Queens","meaning":"Ava Max empowerment anthem","example":"If all of the kings had their queens on the throne.","category":"Music & Lyrics","era":"2020s","trivia":"Ava Max's signature song blending pop with medieval imagery"},
+  {"word":"I Want It That Way","meaning":"Backstreet Boys classic","example":"Tell me why — ain't nothing but a heartache.","category":"Music & Lyrics","era":"1990s","trivia":"Great for English learners — simple, clear pronunciation and vocabulary"},
+  {"word":"Everybody","meaning":"Backstreet Boys dance anthem","example":"Everybody, rock your body right.","category":"Music & Lyrics","era":"1990s","trivia":"Simple repetitive lyrics make it perfect for English pronunciation practice"},
+  {"word":"Bento","meaning":"Japanese packed lunch box","example":"I brought a bento for lunch today.","category":"Lost in Translation","era":"Classic","trivia":"Now used globally — you can find 'bento boxes' in American supermarkets"},
+  {"word":"Fujiwara Armbar","meaning":"Cross armlock submission hold","example":"He locked in the Fujiwara Armbar for the submission!","category":"Lost in Translation","era":"1980s","trivia":"Named after Yoshiaki Fujiwara — adopted into English wrestling terminology"},
+  {"word":"Saito Suplex","meaning":"A suplex with a twist","example":"What a devastating Saito Suplex!","category":"Lost in Translation","era":"1980s","trivia":"Named after Masa Saito — the original innovator of this move"},
+  {"word":"Xerox it","meaning":"To photocopy something","example":"Can you Xerox this document for me?","category":"Lost in Translation","era":"Classic","trivia":"Brand name became a verb — like Google it. Xerox actually discourages this usage"},
+  {"word":"Karaoke","meaning":"Singing along to recorded music","example":"Let's go to karaoke tonight!","category":"Lost in Translation","era":"1980s","trivia":"From Japanese kara (empty) + oke (orchestra) — invented in Kobe, Japan"},
+  {"word":"Rickroll","meaning":"Tricking someone into watching Rick Astley","example":"I clicked the link and got Rickrolled again!","category":"Gaming & Internet","era":"2000s","trivia":"Started on 4chan in 2007 — Rick Astley himself embraced the meme"},
+  {"word":"GG","meaning":"Good Game — said at the end of a match","example":"GG everyone, that was a close one.","category":"Gaming & Internet","era":"2000s","trivia":"Universal gaming etiquette across all competitive games"},
+  {"word":"Noob","meaning":"A new or inexperienced player","example":"Stop being such a noob and learn the controls.","category":"Gaming & Internet","era":"2000s","trivia":"Derived from 'newbie' — can be playful or insulting depending on tone"},
+  {"word":"AFK","meaning":"Away From Keyboard","example":"Going AFK for 5 minutes, need coffee.","category":"Gaming & Internet","era":"2000s","trivia":"One of the oldest internet abbreviations, dating back to IRC chat rooms"},
+  {"word":"Nerf","meaning":"To weaken something in a game update","example":"They nerfed my favorite character again!","category":"Gaming & Internet","era":"2000s","trivia":"Named after Nerf foam toys — making something soft and harmless"},
+  {"word":"Buff","meaning":"To strengthen something in a game update","example":"The new patch buffed the healing class.","category":"Gaming & Internet","era":"2000s","trivia":"Opposite of nerf — from 'buffer' meaning to enhance"},
+  {"word":"Lag","meaning":"Delay in game response due to connection","example":"I died because of lag, not because I'm bad!","category":"Gaming & Internet","era":"2000s","trivia":"The universal excuse for losing in online games worldwide"},
+  {"word":"Easter egg","meaning":"A hidden feature or message in media","example":"Did you find the Easter egg in that movie?","category":"Gaming & Internet","era":"1980s","trivia":"First video game Easter egg was in Atari's Adventure (1980)"},
+  {"word":"Speedrun","meaning":"Completing a game as fast as possible","example":"He did a speedrun of Mario in under 5 minutes.","category":"Gaming & Internet","era":"2000s","trivia":"Games Done Quick charity events have raised over $40 million"},
+  {"word":"NPC","meaning":"Non-Player Character or someone acting robotic","example":"He just walks around like an NPC.","category":"Gaming & Internet","era":"2020s","trivia":"Crossed from gaming into mainstream slang meaning someone with no personality"},
+  {"word":"Clutch","meaning":"Performing brilliantly under pressure","example":"That was a clutch play in the final seconds!","category":"Gaming & Internet","era":"2010s","trivia":"Originally sports term, now widely used in gaming for last-second heroics"},
+  {"word":"Mansion","meaning":"In English: a very large luxurious house","example":"He lives in a mansion with 20 rooms.","category":"Lost in Translation","era":"Classic","trivia":"In Japanese, 'mansion' means apartment — a classic false friend"},
+  {"word":"High tension","meaning":"In English: a state of anxiety or electrical voltage","example":"There was high tension in the room during negotiations.","category":"Lost in Translation","era":"Classic","trivia":"In Japanese, 'high tension' means energetic/excited — completely different meaning"},
+  {"word":"Claim","meaning":"In English: to assert or demand something","example":"He claimed the prize after winning.","category":"Lost in Translation","era":"Classic","trivia":"In Japanese, 'claim' means complaint — English speakers say 'file a complaint' instead"},
+  {"word":"Cunning","meaning":"In English: clever in a sly or deceptive way","example":"The fox is known for being cunning.","category":"Lost in Translation","era":"Classic","trivia":"In Japanese, 'cunning' means cheating on a test — very different from English usage"},
+  {"word":"Naive","meaning":"In English: showing lack of experience or wisdom","example":"It was naive to trust him so quickly.","category":"Lost in Translation","era":"Classic","trivia":"In Japanese, 'naive' is sometimes used positively meaning sensitive/delicate"},
+  {"word":"Traffic Paradise!","meaning":"Sarcastic complaint about traffic in qualifying","example":"Traffic Paradise! I can't get a clean lap!","category":"Sports Lingo","era":"2020s","trivia":"Yuki Tsunoda's memorable radio outburst that became an instant fan favorite"},
+  {"word":"Scissors tackle","meaning":"A dangerous tackle wrapping both legs","example":"That scissors tackle deserves a red card!","category":"Sports Lingo","era":"Classic","trivia":"One of the most dangerous fouls in football — almost always results in a card"},
+  {"word":"What an equalizer!","meaning":"A goal that ties the game","example":"What an equalizer in the 90th minute!","category":"Sports Lingo","era":"Classic","trivia":"Commentators save their most dramatic voices for late equalizers"},
+  {"word":"He has saved his country!","meaning":"A player scores a crucial goal for the nation","example":"He has saved his country with that last-minute goal!","category":"Sports Lingo","era":"Classic","trivia":"Classic commentary line used in World Cup knockout stage moments"},
+  {"word":"Rent free","meaning":"Someone or something you can't stop thinking about","example":"That embarrassing moment is living rent free in my head.","category":"Modern Slang","era":"2020s","trivia":"Originated from sports trash talk — now used for any obsessive thought"},
+  {"word":"Understood the assignment","meaning":"Executed something perfectly","example":"She showed up in that outfit — she understood the assignment.","category":"Modern Slang","era":"2020s","trivia":"Went viral on Twitter/TikTok in 2021 — now used in professional contexts too"},
+  {"word":"Heatwave","meaning":"Extended period of abnormally hot weather","example":"This heatwave is breaking all records.","category":"Weather","era":"Classic","trivia":"Officially defined differently by each country — no universal temperature threshold"},
+  {"word":"Black ice","meaning":"Transparent ice on roads, extremely dangerous","example":"Watch out for black ice on the highway.","category":"Weather","era":"Classic","trivia":"Called 'black' because it's transparent and shows the dark road surface beneath"},
+  {"word":"Botch","meaning":"A failed or poorly executed move","example":"That was a total botch — he missed the landing completely.","category":"Pro Wrestling","era":"2020s","trivia":"AEW's Botchamania compilations made this term mainstream in wrestling culture"},
+  {"word":"How interesting.","meaning":"British way of saying 'I don't care at all'","example":"Oh, you collect stamps? How interesting.","category":"Sarcasm & Irony","era":"Classic","trivia":"The more enthusiastic a British person sounds saying this, the less they actually care"},
+  {"word":"With all due respect","meaning":"I'm about to completely disagree with you","example":"With all due respect, that's the worst idea I've ever heard.","category":"Sarcasm & Irony","era":"Classic","trivia":"The professional equivalent of 'bless your heart' — a polite warning shot"},
+  {"word":"Per my last email","meaning":"I already told you this, read your email","example":"Per my last email, the deadline was yesterday.","category":"Office & Workplace","era":"2010s","trivia":"The most passive-aggressive phrase in corporate email — everyone knows what it really means"},
+  {"word":"Let's take this offline","meaning":"Stop discussing this in the meeting","example":"Great point — let's take this offline and circle back.","category":"Office & Workplace","era":"2000s","trivia":"Corporate speak for 'this conversation is going nowhere in this meeting'"},
+  {"word":"Podium","meaning":"Top 3 finish in a race","example":"He made it to the podium in his first race!","category":"Sports Lingo","era":"Classic","trivia":"F1 podium ceremonies include national anthems and champagne spraying tradition"},
+  {"word":"Hoo-ah!","meaning":"Military exclamation of enthusiasm","example":"Scent of a Woman: Hoo-ah!","category":"Movie Quotes","era":"1990s","trivia":"Al Pacino made this Army expression famous worldwide — won the Oscar for this role"},
+  {"word":"Somebody stop me!","meaning":"I'm out of control and loving it","example":"The Mask: Somebody stop me!","category":"Movie Quotes","era":"1990s","trivia":"Jim Carrey's physical comedy in The Mask set a new standard for comedy acting"},
+  {"word":"Here's a fun one","meaning":"Mr. Monk's way of introducing an observation","example":"Monk: Here's a fun one — the victim was left-handed.","category":"TV & Sitcom","era":"2000s","trivia":"Tony Shalhoub won three Emmys for playing the OCD detective"},
+  {"word":"Aw jeez","meaning":"Minnesota nice way of expressing frustration","example":"Fargo: Aw jeez, that's a real mess there.","category":"TV & Sitcom","era":"1990s","trivia":"The Coen Brothers captured Minnesota dialect so perfectly locals couldn't tell if it was mockery or love"},
+  {"word":"LOL","meaning":"Laugh Out Loud","example":"That meme was so funny, LOL!","category":"Abbreviations","era":"2000s","trivia":"Originally meant 'Lots of Love' in early internet — caused many awkward misunderstandings"},
+  {"word":"FOMO","meaning":"Fear Of Missing Out","example":"I have serious FOMO seeing everyone at the concert.","category":"Abbreviations","era":"2010s","trivia":"Added to Oxford Dictionary in 2013 — describes the anxiety of the social media age"},
+  {"word":"TL;DR","meaning":"Too Long; Didn't Read — a summary","example":"TL;DR — the meeting is moved to Friday.","category":"Abbreviations","era":"2000s","trivia":"Born on Reddit and forums — now used in professional emails as a summary header"},
+  {"word":"GOAT","meaning":"Greatest Of All Time","example":"Jordan is the GOAT of basketball.","category":"Abbreviations","era":"2010s","trivia":"Muhammad Ali was called 'The Greatest' but the GOAT acronym became mainstream via social media"},
+  {"word":"SMH","meaning":"Shaking My Head — expressing disapproval","example":"He forgot his anniversary again, SMH.","category":"Abbreviations","era":"2010s","trivia":"One of the most used text abbreviations — conveys disappointment without words"},
+  {"word":"IYKYK","meaning":"If You Know You Know — insider knowledge","example":"That restaurant's secret menu, IYKYK.","category":"Abbreviations","era":"2020s","trivia":"Creates an in-group feeling — perfect for niche communities and shared experiences"},
+  {"word":"ETA","meaning":"Estimated Time of Arrival","example":"What's your ETA? We're starting dinner soon.","category":"Abbreviations","era":"Classic","trivia":"Originally military/aviation term — now used casually for everything from pizza delivery to friends arriving"},
+  {"word":"PET bottle","meaning":"Polyethylene Terephthalate bottle","example":"Please recycle your PET bottle.","category":"Abbreviations","era":"Classic","trivia":"Everyone uses PET bottles daily but almost nobody knows what PET stands for"},
+  {"word":"SNS","meaning":"Social Networking Service","example":"Which SNS do you use the most?","category":"Abbreviations","era":"2000s","trivia":"Widely used in Japan and Korea but rarely used in English — Americans just say 'social media'"},
+  {"word":"RSVP","meaning":"Respondez S'il Vous Plait — Please respond","example":"Please RSVP by Friday for the wedding.","category":"Abbreviations","era":"Classic","trivia":"French phrase used universally in English — most people don't know it's French"},
+  {"word":"Piece of cake","meaning":"Something very easy to do","example":"That exam was a piece of cake!","category":"Idioms & Phrases","era":"Classic","trivia":"Originated from 1870s cakewalk competitions — easy dances won you a cake as a prize"},
+  {"word":"Spill the tea","meaning":"Share the gossip","example":"Come on, spill the tea — what happened at the party?","category":"Modern Slang","era":"2010s","trivia":"Originated in drag culture, popularized by RuPaul's Drag Race, now mainstream"},
+  {"word":"Slay","meaning":"To do something exceptionally well","example":"She slayed that presentation — everyone was impressed.","category":"Modern Slang","era":"2010s","trivia":"Originally from ballroom/drag culture — crossed into mainstream via Beyonce's album title"},
+  {"word":"Hits different","meaning":"Something feels uniquely special","example":"Coffee on a rainy morning just hits different.","category":"Modern Slang","era":"2020s","trivia":"Became viral on TikTok — used when something ordinary feels extraordinary in context"},
+  {"word":"Red flag","meaning":"A warning sign in a person or situation","example":"He said he doesn't like dogs — that's a red flag.","category":"Modern Slang","era":"2020s","trivia":"The red flag emoji trend on Twitter in 2021 made this phrase explode in popularity"},
+  {"word":"She sells seashells by the seashore","meaning":"Classic English tongue twister","example":"Try saying it fast: She sells seashells by the seashore!","category":"Tongue Twisters","era":"Classic","trivia":"Based on real person Mary Anning, a famous 19th century fossil hunter"},
+  {"word":"How much wood would a woodchuck chuck","meaning":"Playful alliterative tongue twister","example":"How much wood would a woodchuck chuck if a woodchuck could chuck wood?","category":"Tongue Twisters","era":"Classic","trivia":"A New York fish and wildlife official actually calculated the answer: about 700 pounds"},
+  {"word":"Unique New York","meaning":"Deceptively simple tongue twister","example":"Say it five times fast: Unique New York, Unique New York...","category":"Tongue Twisters","era":"Classic","trivia":"Used by actors and news anchors as a vocal warm-up exercise before going on air"},
+  {"word":"Freezing","meaning":"Extremely cold temperature","example":"It's absolutely freezing outside — wear a coat!","category":"Weather","era":"Classic","trivia":"Technically means 0C/32F but people say it whenever they feel cold — even at 10C"},
+  {"word":"Scorching","meaning":"Extremely hot, burning heat","example":"It's scorching today — must be over 40 degrees.","category":"Weather","era":"Classic","trivia":"British people start saying 'scorching' at about 25C — Australians wouldn't even notice"},
+  {"word":"Whiteout","meaning":"Blizzard conditions with zero visibility","example":"The whiteout conditions forced the highway to close.","category":"Weather","era":"Classic","trivia":"Most dangerous winter driving condition — you literally cannot see anything in any direction"},
+  {"word":"Indian summer","meaning":"Warm weather in autumn after first cold spell","example":"We're having a lovely Indian summer this October.","category":"Weather","era":"Classic","trivia":"Term dates back to the 1770s — some now prefer 'second summer' as a more neutral alternative"},
+  {"word":"CEO of","meaning":"The ultimate example of something","example":"She's the CEO of arriving late to every meeting.","category":"Modern Slang","era":"2020s","trivia":"Twitter/TikTok trend that turned a corporate title into a humorous superlative"},
+  {"word":"The Viper is coiling","meaning":"Building up tension before a sudden strike","example":"Watch out — the Viper is coiling!","category":"Pro Wrestling","era":"2000s","trivia":"Randy Orton's signature setup before the RKO"},
+  {"word":"I hear voices in my head","meaning":"Entrance theme lyric used as a catchphrase","example":"I hear voices in my head. They counsel me. They understand.","category":"Pro Wrestling","era":"2000s","trivia":"Randy Orton's iconic entrance theme by Rev Theory"},
+  {"word":"Stone cold","meaning":"Completely emotionless, ruthless, or ice-cold","example":"He gave a stone cold stare and walked away.","category":"Pro Wrestling","era":"1990s","trivia":"Steve Austin made this a household phrase — also means a cold beer"},
+  {"word":"Ate / She Ate","meaning":"Did an exceptional job or delivered an amazing performance","example":"She walked in and absolutely ate that presentation.","category":"Modern Slang","era":"2020s","trivia":"Originally from drag/ballroom culture, went mainstream via TikTok"},
+  {"word":"Aura Farming","meaning":"Deliberately curating your look or actions to appear cool online","example":"He's been aura farming with those sunset photos.","category":"Modern Slang","era":"2020s","trivia":"Aura = charisma points; farming = deliberately accumulating them"},
+  {"word":"Based","meaning":"Being authentic, confident, and unapologetically yourself","example":"That was a based opinion — respect.","category":"Modern Slang","era":"2020s","trivia":"Originally from rapper Lil B 'The BasedGod' — reclaimed as positive"},
+  {"word":"Brain Rot","meaning":"Mental decline from consuming too much low-quality online content","example":"I've been scrolling for 3 hours — total brain rot.","category":"Modern Slang","era":"2020s","trivia":"Oxford Word of the Year 2024 candidate — reflects digital age concerns"},
+  {"word":"Canon Event","meaning":"A defining life experience that had to happen for personal growth","example":"Getting fired was my canon event — it led me here.","category":"Modern Slang","era":"2020s","trivia":"From Spider-Verse movie — events that must happen in every Spider-Man's story"},
+  {"word":"Chopped","meaning":"Something that looks bad or fails to meet expectations","example":"That haircut is chopped, bro.","category":"Modern Slang","era":"2020s","trivia":"NYC slang that went viral on social media"},
+  {"word":"Crashing Out","meaning":"Having an emotional meltdown or giving up dramatically","example":"After the deadline moved up, he completely crashed out.","category":"Modern Slang","era":"2020s","trivia":"Combines gaming terminology with real-life burnout culture"},
+  {"word":"Delulu","meaning":"Short for delusional — having unrealistic expectations","example":"She thinks he'll text back? She's so delulu.","category":"Modern Slang","era":"2020s","trivia":"K-pop fan culture origin — 'delulu is the solulu' (delusion is the solution)"},
+  {"word":"Glazing","meaning":"Giving someone excessive, insincere praise or sucking up","example":"Stop glazing the boss — everyone can see it.","category":"Modern Slang","era":"2020s","trivia":"From gaming/streaming culture — originally meant overhyping a player"},
+  {"word":"Mogging","meaning":"Outshining or looking much more attractive than someone else","example":"He walked in and mogged everyone at the party.","category":"Modern Slang","era":"2020s","trivia":"From 'AMOG' (Alpha Male of Group) — fitness/internet culture origin"},
+  {"word":"Sigma","meaning":"An independent, self-assured lone wolf type of cool","example":"He didn't follow the crowd — total sigma move.","category":"Modern Slang","era":"2020s","trivia":"From the 'sigma male' meme — alternative to alpha/beta hierarchy"},
+  {"word":"Skibidi","meaning":"A versatile nonsense filler word from meme culture","example":"That was so skibidi of you.","category":"Modern Slang","era":"2020s","trivia":"From 'Skibidi Toilet' YouTube series — Gen Alpha's signature word"},
+  {"word":"Unc","meaning":"Short for uncle — used teasingly to call someone old or out-of-touch","example":"OK unc, nobody says that anymore.","category":"Modern Slang","era":"2020s","trivia":"Affectionate teasing — similar to 'OK boomer' but less aggressive"},
+  {"word":"6-7","meaning":"A viral nonsense number sequence and hand gesture","example":"He threw up the 6-7 in the photo.","category":"Modern Slang","era":"2020s","trivia":"Gen Alpha trend — the meaning is intentionally meaningless, which IS the point"},
+  {"word":"Lowkenuinely","meaning":"A mix of lowkey and genuinely — sharing a sincere calm opinion","example":"Lowkenuinely, that was the best meal I've ever had.","category":"Modern Slang","era":"2020s","trivia":"Gen Z wordsmithing — combining two words into one for efficiency"},
+  {"word":"Psych!","meaning":"Just kidding! Gotcha!","example":"I'm giving you my car... PSYCH!","category":"Dead Slang","era":"1990s","trivia":"The ultimate 90s fake-out word — always delivered with a grin"},
+  {"word":"Fly","meaning":"Cool, stylish, attractive","example":"Those new kicks are fly!","category":"Dead Slang","era":"1980s","trivia":"Hip-hop culture origin — still occasionally used in modern rap"},
+  {"word":"Phat","meaning":"Excellent, attractive, cool","example":"That beat is phat!","category":"Dead Slang","era":"1990s","trivia":"Backronym: Pretty Hot And Tempting — though this origin is debated"},
+  {"word":"Cowabunga","meaning":"Exclamation of excitement or joy","example":"Cowabunga, dude! Let's hit the waves!","category":"Dead Slang","era":"1980s","trivia":"Originally from Howdy Doody TV show, made famous by TMNT's Michelangelo"},
+  {"word":"Bogus","meaning":"Fake, not genuine, unfair","example":"That call was totally bogus, ref!","category":"Dead Slang","era":"1980s","trivia":"Bill & Ted used this extensively — 'Most bogus!' became a catchphrase"},
+  {"word":"Hella","meaning":"Very, extremely, a lot of","example":"That concert was hella good!","category":"Dead Slang","era":"1990s","trivia":"Northern California origin — South Park famously mocked it as a Cartman word"},
+  {"word":"Eat my shorts","meaning":"Expression of defiance or dismissal","example":"You want me to clean up? Eat my shorts!","category":"Dead Slang","era":"1980s","trivia":"Bart Simpson's signature catchphrase on The Simpsons"},
+  {"word":"Not!","meaning":"Negating everything just said as a joke","example":"Nice outfit... NOT!","category":"Dead Slang","era":"1990s","trivia":"Wayne's World made this the definitive 90s comedy device"},
+  {"word":"Fortune favors the bold","meaning":"Taking risks leads to success","example":"I quit my job to start a business — fortune favors the bold.","category":"Famous Quotes","era":"Classic","trivia":"Latin origin: Audentes fortuna iuvat — used by Virgil in the Aeneid"},
+  {"word":"Be the change you wish to see in the world","meaning":"Start with yourself to make a difference","example":"Instead of complaining, be the change you wish to see.","category":"Famous Quotes","era":"Classic","trivia":"Attributed to Gandhi — though the exact quote is paraphrased from his writings"},
+  {"word":"In the middle of difficulty lies opportunity","meaning":"Challenges contain hidden chances for growth","example":"The market crash was tough, but in difficulty lies opportunity.","category":"Famous Quotes","era":"Classic","trivia":"Attributed to Albert Einstein — perfectly describes entrepreneurial mindset"},
+  {"word":"The only thing we have to fear is fear itself","meaning":"Fear is the greatest obstacle","example":"Don't let anxiety stop you — the only thing to fear is fear itself.","category":"Famous Quotes","era":"1930s","trivia":"FDR's 1933 inaugural address during the Great Depression"},
+  {"word":"That's one small step for man, one giant leap for mankind","meaning":"A small action can have enormous significance","example":"Launching the app felt like one small step for us, one giant leap for the company.","category":"Famous Quotes","era":"1960s","trivia":"Neil Armstrong, July 20, 1969 — the most famous words spoken off Earth"},
+  {"word":"I have a dream","meaning":"A vision for a better future","example":"Martin Luther King's speech changed the course of history.","category":"Famous Quotes","era":"1960s","trivia":"August 28, 1963 — the 'dream' section was partially improvised"},
+  {"word":"Stay hungry, stay foolish","meaning":"Never stop learning, never stop taking risks","example":"As Steve Jobs said — stay hungry, stay foolish.","category":"Famous Quotes","era":"2000s","trivia":"Jobs quoted this from the Whole Earth Catalog in his 2005 Stanford speech"},
+  {"word":"It does not do to dwell on dreams and forget to live","meaning":"Don't get lost in fantasies — take action","example":"Stop planning and start doing — don't dwell on dreams.","category":"Famous Quotes","era":"1990s","trivia":"Dumbledore to Harry Potter — J.K. Rowling's wisdom through fiction"},
+  {"word":"Bite off more than you can chew","meaning":"To take on more than you can handle","example":"I volunteered for three projects — definitely bit off more than I could chew.","category":"Idioms & Phrases","era":"Classic","trivia":"Origin: 1800s America — literally about chewing tobacco"},
+  {"word":"Break the ice","meaning":"To initiate conversation in an awkward situation","example":"He told a joke to break the ice at the meeting.","category":"Idioms & Phrases","era":"Classic","trivia":"Origin: Ships would literally break ice to create passages for trade routes"},
+  {"word":"Burning the midnight oil","meaning":"Working late into the night","example":"We've been burning the midnight oil to meet the deadline.","category":"Idioms & Phrases","era":"Classic","trivia":"Before electricity, oil lamps were used — working late meant burning more oil"},
+  {"word":"Costs an arm and a leg","meaning":"Extremely expensive","example":"That sports car costs an arm and a leg!","category":"Idioms & Phrases","era":"Classic","trivia":"Possibly from portrait painting — full body portraits cost more than head shots"},
+  {"word":"Cry over spilled milk","meaning":"To be upset about something that cannot be undone","example":"The deal fell through, but no use crying over spilled milk.","category":"Idioms & Phrases","era":"Classic","trivia":"First recorded in 1659 — one of the oldest English proverbs still in daily use"},
+  {"word":"Hit the nail on the head","meaning":"To be exactly right about something","example":"Your analysis hit the nail on the head.","category":"Idioms & Phrases","era":"Classic","trivia":"Carpentry origin — precision in hitting the nail perfectly"},
+  {"word":"Kill two birds with one stone","meaning":"To accomplish two things with a single action","example":"By biking to work, I kill two birds with one stone — exercise and commute.","category":"Idioms & Phrases","era":"Classic","trivia":"First recorded in 1656 — Thomas Hobbes used it in a philosophical work"},
+  {"word":"Let the cat out of the bag","meaning":"To reveal a secret accidentally","example":"She let the cat out of the bag about the surprise party.","category":"Idioms & Phrases","era":"Classic","trivia":"Origin: Medieval markets where piglets were sold in bags — a cat substituted was a scam"},
+  {"word":"Once in a blue moon","meaning":"Very rarely","example":"He only calls once in a blue moon.","category":"Idioms & Phrases","era":"Classic","trivia":"A blue moon is the second full moon in a calendar month — occurs every 2.7 years"},
+  {"word":"Spill the beans","meaning":"To reveal secret information","example":"Come on, spill the beans — what happened?","category":"Idioms & Phrases","era":"Classic","trivia":"Ancient Greek voting used beans — spilling them revealed the vote count"},
+  {"word":"The ball is in your court","meaning":"It's your turn to take action","example":"I've made my offer — the ball is in your court now.","category":"Idioms & Phrases","era":"Classic","trivia":"Tennis origin — the responsibility shifts to the other player"},
+  {"word":"Hang in there","meaning":"Don't give up, stay strong","example":"I know it's tough, but hang in there — it'll get better.","category":"Everyday Expressions","era":"Classic","trivia":"The famous 1970s kitten poster made this phrase iconic"},
+  {"word":"Hit the road","meaning":"To leave, to start a journey","example":"It's getting late — time to hit the road.","category":"Everyday Expressions","era":"Classic","trivia":"Ray Charles' 'Hit the Road Jack' (1961) made this phrase a classic"},
+  {"word":"Long time no see","meaning":"It's been a while since we last met","example":"Hey! Long time no see! How have you been?","category":"Everyday Expressions","era":"Classic","trivia":"Believed to be a calque from Chinese or Native American pidgin English"},
+  {"word":"My bad","meaning":"My mistake, I'm sorry","example":"Oh, I sent it to the wrong person — my bad!","category":"Everyday Expressions","era":"1990s","trivia":"Popularized by pickup basketball culture — now universal"},
+  {"word":"No worries","meaning":"It's okay, don't worry about it","example":"You're late? No worries, we just started.","category":"Everyday Expressions","era":"2000s","trivia":"Australian English origin — 'No worries, mate' went global"},
+  {"word":"24/7","meaning":"All day, every day, non-stop","example":"That convenience store is open 24/7.","category":"Everyday Expressions","era":"1990s","trivia":"Became common in the 1990s with the rise of internet and always-on culture"},
+  {"word":"ASAP","meaning":"As Soon As Possible","example":"Please send the report ASAP.","category":"Everyday Expressions","era":"Classic","trivia":"Military origin — now the most used abbreviation in business emails worldwide"},
+  {"word":"Heads up","meaning":"A warning or advance notice","example":"Heads up — the boss is coming this way.","category":"Everyday Expressions","era":"Classic","trivia":"Baseball origin — warning to look up for a fly ball"},
+  {"word":"On the same page","meaning":"In agreement, having the same understanding","example":"Let's make sure we're all on the same page before the meeting.","category":"Office & Workplace","era":"Classic","trivia":"Book reading metaphor — everyone reading the same part of the story"},
+  {"word":"Touch base","meaning":"To briefly check in or make contact","example":"Let's touch base next week about the project.","category":"Office & Workplace","era":"Classic","trivia":"Baseball origin — runners touch bases; in business, it means a quick check-in"},
+  {"word":"Move the needle","meaning":"To make a noticeable difference or impact","example":"This campaign really moved the needle on brand awareness.","category":"Office & Workplace","era":"2000s","trivia":"From analog meters — the needle moves when there's a measurable change"},
+  {"word":"Low-hanging fruit","meaning":"Easy wins or tasks that require minimal effort","example":"Let's go after the low-hanging fruit first.","category":"Office & Workplace","era":"Classic","trivia":"Fruit picking metaphor — the easiest fruit to reach is picked first"},
+  {"word":"Circle back","meaning":"To return to a topic or discussion later","example":"Let's circle back on this after lunch.","category":"Office & Workplace","era":"2000s","trivia":"One of the most mocked corporate buzzwords — yet everyone uses it"},
+  {"word":"Well, isn't that special","meaning":"Sarcastic response to something unimpressive","example":"You cleaned your room for the first time this year? Well, isn't that special.","category":"Sarcasm & Irony","era":"1990s","trivia":"Church Lady from Saturday Night Live made this phrase iconic"},
+  {"word":"Oh, what a surprise","meaning":"Sarcastically expressing that something was completely expected","example":"He's late again? Oh, what a surprise.","category":"Sarcasm & Irony","era":"Classic","trivia":"The flatter the delivery, the more devastating the sarcasm"},
+  {"word":"Tell me something I don't know","meaning":"I already knew that, give me new information","example":"The project is behind schedule? Tell me something I don't know.","category":"Sarcasm & Irony","era":"Classic","trivia":"Often used in movies when a character is fed up with obvious information"},
+  {"word":"How delightful","meaning":"Sarcastically expressing displeasure","example":"Another Monday meeting? How delightful.","category":"Sarcasm & Irony","era":"Classic","trivia":"British-style understatement — the more polite it sounds, the more sarcastic it is"},
+  {"word":"What a time to be alive","meaning":"Sarcastic commentary on absurd modern situations","example":"Paying $8 for coffee? What a time to be alive.","category":"Sarcasm & Irony","era":"2010s","trivia":"Drake and Future album title (2015) — became a universal sarcastic meme"},
+  {"word":"Bless your heart","meaning":"Southern US way of calling someone naive or foolish","example":"You thought that email was real? Bless your heart.","category":"Sarcasm & Irony","era":"Classic","trivia":"The ultimate Southern US passive-aggressive phrase — sounds sweet, cuts deep"},
+  {"word":"I'm shocked. Shocked!","meaning":"Feigning surprise at something completely expected","example":"Politicians making empty promises? I'm shocked. Shocked!","category":"Sarcasm & Irony","era":"1940s","trivia":"Captain Renault in Casablanca (1942) — one of cinema's greatest sarcastic lines"},
+  {"word":"Sure, Jan","meaning":"Expressing disbelief in what someone just said","example":"You ran a marathon yesterday? Sure, Jan.","category":"Sarcasm & Irony","era":"1990s","trivia":"From The Brady Bunch Movie (1995) — became a viral meme in the 2010s"},
+  {"word":"Cool story, bro","meaning":"Dismissive response to a boring or unbelievable story","example":"You almost met a celebrity? Cool story, bro.","category":"Sarcasm & Irony","era":"2010s","trivia":"Internet culture staple — often accompanied by 'tell it again' for extra sarcasm"},
+  {"word":"That went well","meaning":"Sarcastically noting something that went terribly wrong","example":"The presentation crashed mid-slide. That went well.","category":"Sarcasm & Irony","era":"Classic","trivia":"British understatement at its finest — the worse it went, the calmer the delivery"},
+  {"word":"Hat trick","meaning":"Three goals by one player in a single game","example":"Messi completed a hat trick in the Champions League!","category":"Sports Expressions","era":"Classic","trivia":"Origin: Cricket — a bowler who took 3 wickets was awarded a new hat"},
+  {"word":"Hail Mary","meaning":"A desperate last-chance attempt","example":"With 5 seconds left, the quarterback threw a Hail Mary.","category":"Sports Expressions","era":"1970s","trivia":"Named after Roger Staubach's 1975 playoff pass — he said he closed his eyes and prayed"},
+  {"word":"Down to the wire","meaning":"Decided at the very last moment","example":"The election went down to the wire.","category":"Sports Expressions","era":"Classic","trivia":"Horse racing origin — a wire was stretched across the finish line"},
+  {"word":"Buzzer beater","meaning":"A shot made just before time expires","example":"He hit a buzzer beater to win the championship!","category":"Sports Expressions","era":"Classic","trivia":"Basketball term — the shot must leave the player's hand before the buzzer sounds"},
+  {"word":"Checkmate","meaning":"A decisive, inescapable defeat","example":"With that evidence, it was checkmate for the defense.","category":"Sports Expressions","era":"Classic","trivia":"From Persian 'shah mat' meaning 'the king is dead' — chess origin"},
+  {"word":"Move the goalposts","meaning":"To change the rules or criteria unfairly","example":"Every time I meet their requirements, they move the goalposts.","category":"Sports Expressions","era":"Classic","trivia":"Football/soccer origin — now widely used in business and politics"},
+  {"word":"Throw in the towel","meaning":"To give up, to surrender","example":"After three failed attempts, he threw in the towel.","category":"Sports Expressions","era":"Classic","trivia":"Boxing origin — a trainer throws a towel into the ring to stop the fight"},
+  {"word":"Par for the course","meaning":"What is normal or expected","example":"Delays on this project? Par for the course.","category":"Sports Expressions","era":"Classic","trivia":"Golf origin — par is the expected number of strokes for a hole"},
+  {"word":"Drop the ball","meaning":"To make a mistake or fail to follow through","example":"Someone really dropped the ball on this order.","category":"Sports Expressions","era":"Classic","trivia":"Multiple sports origin — literally failing to catch or hold the ball"},
+  {"word":"When it rains, it pours","meaning":"Problems tend to come all at once","example":"Lost my keys, missed the bus, and got a flat tire — when it rains, it pours.","category":"Weather Expressions","era":"Classic","trivia":"Morton Salt company slogan from 1914 — originally about salt flowing freely"},
+  {"word":"Every cloud has a silver lining","meaning":"There is something positive in every bad situation","example":"I lost my job but found a better one — every cloud has a silver lining.","category":"Weather Expressions","era":"Classic","trivia":"From John Milton's Comus (1634) — one of the oldest English proverbs"},
+  {"word":"Calm before the storm","meaning":"A peaceful period before trouble arrives","example":"The office was quiet today — felt like the calm before the storm.","category":"Weather Expressions","era":"Classic","trivia":"Sailors noticed the sea often calms before a major storm hits"},
+  {"word":"Snowed under","meaning":"Overwhelmed with work or responsibilities","example":"I can't go out tonight — I'm completely snowed under with deadlines.","category":"Weather Expressions","era":"Classic","trivia":"Imagery of being buried under snow — unable to move or escape"},
+  {"word":"Chasing rainbows","meaning":"Pursuing unrealistic or impossible goals","example":"He quit his job to become a rock star — always chasing rainbows.","category":"Weather Expressions","era":"Classic","trivia":"You can never reach the end of a rainbow — it moves as you move"},
+  {"word":"Steal someone's thunder","meaning":"To take credit for someone else's idea or achievement","example":"I was about to announce it, but she stole my thunder.","category":"Weather Expressions","era":"Classic","trivia":"Playwright John Dennis invented a thunder machine — rivals stole his technique"},
+  {"word":"Bolt from the blue","meaning":"A sudden, completely unexpected event","example":"His resignation was a bolt from the blue — nobody saw it coming.","category":"Weather Expressions","era":"Classic","trivia":"Lightning from a clear blue sky — the ultimate unexpected event"},
+  {"word":"Shooting the breeze","meaning":"Having a casual, relaxed conversation","example":"We were just shooting the breeze on the porch.","category":"Weather Expressions","era":"Classic","trivia":"1940s American slang — talking as aimlessly as shooting at the wind"},
+  {"word":"Fair-weather friend","meaning":"Someone who is only around during good times","example":"He disappeared when I needed help — total fair-weather friend.","category":"Weather Expressions","era":"Classic","trivia":"Nautical origin — fair weather sailors only sail in calm conditions"},
+  {"word":"Red lorry, yellow lorry","meaning":"British tongue twister for R and L sounds","example":"Try alternating: red lorry, yellow lorry, red lorry...","category":"Tongue Twisters","era":"Classic","trivia":"Especially difficult for non-native speakers — tests R/L distinction"},
+  {"word":"Irish wristwatch","meaning":"Nearly impossible tongue twister","example":"Say 'Irish wristwatch' three times fast. Go!","category":"Tongue Twisters","era":"Classic","trivia":"Voted one of the most difficult tongue twisters — the R-SH-W combination is brutal"},
+  {"word":"Sixth sick sheik's sixth sheep's sick","meaning":"Guinness World Record hardest tongue twister","example":"Even native speakers struggle with this one.","category":"Tongue Twisters","era":"Classic","trivia":"Listed in the Guinness Book of World Records as the hardest tongue twister"},
+  {"word":"Fuzzy Wuzzy was a bear","meaning":"Classic children's tongue twister","example":"Fuzzy Wuzzy was a bear, Fuzzy Wuzzy had no hair, Fuzzy Wuzzy wasn't very fuzzy, was he?","category":"Tongue Twisters","era":"Classic","trivia":"Also a nickname for Sudanese warriors in the 1800s — their hair resembled fuzzy texture"},
+  {"word":"Betty Botter bought some butter","meaning":"Tongue twister for B and T sounds","example":"But she said the butter's bitter — if I put it in my batter, it will make my batter bitter.","category":"Tongue Twisters","era":"Classic","trivia":"One of the longest traditional tongue twisters — great for pronunciation practice"},
+  {"word":"Imagine","meaning":"Envisioning a world of peace and unity","example":"Imagine all the people living life in peace.","category":"Music & Lyrics","era":"1970s","trivia":"John Lennon wrote this in 1971 — consistently voted one of the greatest songs ever"},
+  {"word":"We Will Rock You","meaning":"Anthem of defiance and power","example":"Buddy, you're a boy, make a big noise, playing in the street.","category":"Music & Lyrics","era":"1970s","trivia":"Queen's Brian May wrote it to create audience participation — stomp-stomp-clap"},
+  {"word":"What's Love Got to Do with It","meaning":"Questioning the role of love in relationships","example":"What's love got to do, got to do with it?","category":"Music & Lyrics","era":"1980s","trivia":"Tina Turner's comeback hit (1984) — also became her biopic movie title"},
+  {"word":"Livin' on a Prayer","meaning":"Surviving on hope and determination","example":"Whoa, we're halfway there — livin' on a prayer!","category":"Music & Lyrics","era":"1980s","trivia":"Bon Jovi's signature song — the talk box effect on the intro is instantly recognizable"},
+  {"word":"Smells Like Teen Spirit","meaning":"The anthem of Generation X rebellion","example":"Here we are now, entertain us.","category":"Music & Lyrics","era":"1990s","trivia":"Kurt Cobain said the title came from a friend writing 'Kurt smells like Teen Spirit' — a deodorant brand"},
+  {"word":"Lose Yourself","meaning":"Seizing the one opportunity you have","example":"You only get one shot, do not miss your chance to blow.","category":"Music & Lyrics","era":"2000s","trivia":"Eminem wrote this for 8 Mile — first rap song to win an Academy Award for Best Original Song"},
+  {"word":"Rolling in the Deep","meaning":"Experiencing deep emotional turmoil","example":"We could have had it all — rolling in the deep.","category":"Music & Lyrics","era":"2010s","trivia":"Adele wrote this after a breakup — 'rolling in the deep' is a blues expression meaning betrayal"},
+  {"word":"Don't Stop Believin'","meaning":"Never give up hope","example":"Just a small town girl, livin' in a lonely world.","category":"Music & Lyrics","era":"1980s","trivia":"Journey's 1981 hit became the most downloaded pre-digital song — The Sopranos finale made it legendary"},
+  {"word":"Hotel California","meaning":"A metaphor for excess and inescapable situations","example":"You can check out any time you like, but you can never leave.","category":"Music & Lyrics","era":"1970s","trivia":"Eagles said it's about the dark underbelly of the American Dream — not an actual hotel"},
+  {"word":"Every Breath You Take","meaning":"Obsessive watching over someone","example":"Every breath you take, every move you make, I'll be watching you.","category":"Music & Lyrics","era":"1980s","trivia":"Often played at weddings despite Sting saying it's about surveillance and obsession, not love"},
+  {"word":"Injured List (IL)","meaning":"List of players too injured to play (formerly DL - Disabled List)","example":"He's been on the IL for three weeks with a hamstring injury.","category":"Abbreviations","era":"2010s","trivia":"MLB changed from 'Disabled List' to 'Injured List' in 2019 for sensitivity reasons"},
+  {"word":"DNF (Did Not Finish)","meaning":"Failed to complete a race","example":"Three cars DNF'd in the first lap crash.","category":"Abbreviations","era":"Classic","trivia":"Every F1 driver dreads this — Alonso holds the record for most career DNFs"},
+  {"word":"MVP (Most Valuable Player)","meaning":"The best performer in a game or season","example":"Ohtani won MVP in both leagues — unprecedented!","category":"Abbreviations","era":"Classic","trivia":"Now used far beyond sports — 'You're the MVP' is common workplace praise"},
+  {"word":"OT (Overtime)","meaning":"Extra time played beyond regulation","example":"The game went to OT and they won with a buzzer beater!","category":"Abbreviations","era":"Classic","trivia":"Different sports have different OT rules — NFL sudden death vs NBA full 5 minutes"},
+  {"word":"Consent","meaning":"(Japanese English) Electrical outlet — but in English it means agreement/permission","example":"Wrong: Where's the consent? Right: Where's the outlet/socket?","category":"Lost in Translation","era":"Classic","trivia":"Asking 'where's the consent?' in English will get very confused looks"},
+  {"word":"Viking","meaning":"(Japanese English) All-you-can-eat buffet — but in English, Vikings are Norse warriors","example":"Wrong: Let's go to a Viking restaurant. Right: Let's go to a buffet.","category":"Lost in Translation","era":"Classic","trivia":"The Imperial Hotel in Tokyo coined this in 1958 — inspired by Scandinavian smorgasbord"},
+  {"word":"Skinship","meaning":"(Japanese English) Physical affection — this word doesn't exist in English","example":"Wrong: Skinship is important. Right: Physical affection/bonding is important.","category":"Lost in Translation","era":"Classic","trivia":"Coined in Japan — if you say 'skinship' to an American, they won't understand"},
+  {"word":"Smart","meaning":"In Japanese, smart means slim/slender — in English it means intelligent","example":"Wrong: You look smart (meaning thin). Right: You look slim/fit.","category":"Lost in Translation","era":"Classic","trivia":"Telling someone 'you look smart' in English means they look intelligent or well-dressed"},
+  {"word":"Fight!","meaning":"(Japanese English) Used as encouragement — in English it means physical combat","example":"Wrong: Fight! (cheering someone on). Right: You got this! Go for it!","category":"Lost in Translation","era":"Classic","trivia":"Shouting 'Fight!' in English sounds like you're starting a brawl, not cheering"},
+  {"word":"Handle","meaning":"(Japanese English) Username/screen name — in English, handle is a door handle","example":"Wrong: What's your handle? Right: What's your username/screen name?","category":"Lost in Translation","era":"Classic","trivia":"Actually 'handle' WAS used for CB radio nicknames in the 1970s — so it's retro-correct!"},
+  {"word":"Box seats","meaning":"Premium seating area in a stadium or theater","example":"We got box seats for the Yankees game!","category":"Sports Expressions","era":"Classic","trivia":"Originally from theater — private enclosed seating for wealthy patrons"},
+  {"word":"Southpaw","meaning":"A left-handed person, especially a pitcher or boxer","example":"The southpaw pitcher struck out 12 batters.","category":"Sports Expressions","era":"Classic","trivia":"Baseball origin — ballparks were oriented so a lefty's throwing arm faced south"},
+  {"word":"Curveball","meaning":"An unexpected challenge or surprise","example":"Life threw me a curveball when the company restructured.","category":"Sports Expressions","era":"Classic","trivia":"Baseball pitch that curves — now universally means any unexpected twist"},
+  {"word":"Monday morning quarterback","meaning":"Someone who criticizes decisions after the fact","example":"It's easy to be a Monday morning quarterback after the game.","category":"Sports Expressions","era":"Classic","trivia":"American football is played on Sundays — critics analyze on Monday morning"},
+  {"word":"Straight from the horse's mouth","meaning":"Information from the most reliable source","example":"I heard it straight from the horse's mouth — the CEO told me personally.","category":"Idioms & Phrases","era":"Classic","trivia":"Horse racing origin — checking a horse's teeth reveals its true age and condition"},
+  {"word":"Barking up the wrong tree","meaning":"Pursuing a mistaken course of action","example":"If you think I did it, you're barking up the wrong tree.","category":"Idioms & Phrases","era":"Classic","trivia":"Hunting dogs would bark at a tree where they thought prey was hiding — sometimes wrong"},
+  {"word":"The whole nine yards","meaning":"Everything, the full extent","example":"We went all out for the party — decorations, catering, the whole nine yards.","category":"Idioms & Phrases","era":"Classic","trivia":"Origin debated — possibly WWII fighter plane ammo belts that were 27 feet (9 yards) long"},
+  {"word":"Kick the bucket","meaning":"To pass away, to die","example":"Old Mr. Johnson finally kicked the bucket at 99.","category":"Idioms & Phrases","era":"Classic","trivia":"Multiple origin theories — one involves standing on a bucket with a noose"},
+  {"word":"Jump on the bandwagon","meaning":"To join a popular trend or activity","example":"Everyone's jumping on the AI bandwagon these days.","category":"Idioms & Phrases","era":"Classic","trivia":"1800s political campaigns used bandwagons — supporters literally jumped on"},
+  {"word":"Raining cats and dogs","meaning":"Raining extremely heavily","example":"Don't go out now — it's raining cats and dogs!","category":"Weather Expressions","era":"Classic","trivia":"Jonathan Swift used this in 1738 — origin possibly from animals sheltering in thatched roofs"},
+  {"word":"Three sheets to the wind","meaning":"Very intoxicated","example":"After the office party, he was three sheets to the wind.","category":"Everyday Expressions","era":"Classic","trivia":"Nautical origin — sheets are ropes controlling sails; loose sheets mean an uncontrolled ship"},
+  {"word":"Burning bridges","meaning":"Destroying relationships or opportunities permanently","example":"Don't burn bridges when you leave a job — you never know.","category":"Office & Workplace","era":"Classic","trivia":"Military origin — armies would burn bridges behind them to prevent retreat"},
+  {"word":"Elephant in the room","meaning":"An obvious problem that nobody wants to discuss","example":"His poor performance is the elephant in the room at every meeting.","category":"Office & Workplace","era":"Classic","trivia":"First used by Ivan Krylov in 1814 — an elephant in a museum that visitors somehow ignore"},
+  {"word":"Back to square one","meaning":"Starting over from the beginning","example":"The client rejected everything — we're back to square one.","category":"Office & Workplace","era":"Classic","trivia":"Possibly from board games like Snakes and Ladders — landing on a snake sends you back"},
+{"word":"Doki-Doki (ドキドキ)","meaning":"Heart pounding / Butterflies in my stomach","example":"My heart was going doki-doki before the job interview.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"One of the most universally known Japanese onomatopoeia — used for both anxiety and romantic excitement"},
+{"word":"Waku-Waku (ワクワク)","meaning":"Thrilled / Pumped / Stoked","example":"I'm so waku-waku about the trip to Tokyo next week!","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Popularized globally by the character Anya from Spy x Family — 'Waku waku!'"},
+{"word":"Sowa-Sowa (ソワソワ)","meaning":"Antsy / Restless / On edge","example":"He was all sowa-sowa waiting for the exam results.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Describes that fidgety, can't-sit-still feeling — no single English word captures it perfectly"},
+{"word":"Ira-Ira (イライラ)","meaning":"Irritated / Ticked off / Wound up","example":"The slow Wi-Fi is making me so ira-ira right now.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Often used in manga with a cross-shaped vein mark on the character's forehead"},
+{"word":"Muka-Muka (ムカムカ)","meaning":"Fuming / Pissed off / Seething","example":"His rude comment made me absolutely muka-muka.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Can mean both anger AND nausea — context determines which one"},
+{"word":"Biku-Biku (ビクビク)","meaning":"On pins and needles / Jumpy / Skittish","example":"The cat was biku-biku during the thunderstorm.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Describes a state of constant nervousness — like expecting something bad to happen"},
+{"word":"Moya-Moya (モヤモヤ)","meaning":"Nagging feeling / Something's off / Unsettled","example":"I have this moya-moya feeling that I forgot something important.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Like a fog in your mind — you can't pinpoint what's wrong but something doesn't feel right"},
+{"word":"Uki-Uki (ウキウキ)","meaning":"In high spirits / Walking on air / Giddy","example":"She was all uki-uki after getting the promotion.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"The 'uki' comes from 'uku' (to float) — literally floating with happiness"},
+{"word":"Shiku-Shiku (シクシク)","meaning":"Sobbing / Whimpering / Sniffling","example":"The child was shiku-shiku crying after dropping the ice cream.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Quiet, suppressed crying — as opposed to loud wailing"},
+{"word":"Oro-Oro (オロオロ)","meaning":"Flustered / In a panic / At a loss","example":"He went all oro-oro when the fire alarm went off.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Describes someone who panics and doesn't know what to do — running around aimlessly"},
+{"word":"Meso-Meso (メソメソ)","meaning":"Moping / Being weepy / Blubbering","example":"Stop being so meso-meso and let's figure out a solution.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Has a slightly negative nuance — implies the crying is excessive or unnecessary"},
+{"word":"Hara-Hara (ハラハラ)","meaning":"On the edge of my seat / Nail-biting / Nerve-wracking","example":"That last-minute goal had me totally hara-hara!","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Also describes leaves or petals falling gently — same sound, completely different feeling"},
+{"word":"Zoku-Zoku (ゾクゾク)","meaning":"Chills down my spine / Goosebumps","example":"That horror movie gave me zoku-zoku from start to finish.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Can be positive (excitement) or negative (fear/cold) — context is everything"},
+{"word":"Kyun-Kyun (キュンキュン)","meaning":"Heart-melting / Makes my heart skip a beat / Swoon","example":"That scene in the drama made everyone go kyun-kyun.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Became a massive trend word in Japanese pop culture — the feeling of your heart being squeezed"},
+{"word":"Gata-Gata (ガタガタ)","meaning":"Shivering / Trembling / Shaking like a leaf","example":"I was gata-gata shaking in the freezing cold.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Also used for rattling sounds — a rickety old car goes gata-gata too"},
+{"word":"Kura-Kura (クラクラ)","meaning":"Dizzy / Lightheaded / Seeing stars","example":"I stood up too fast and went all kura-kura.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"The spinning sensation — like the world is rotating around you"},
+{"word":"Zuki-Zuki (ズキズキ)","meaning":"Throbbing / Pounding headache","example":"My head has been zuki-zuki all morning.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Specifically describes a rhythmic, pulsing pain — synced with your heartbeat"},
+{"word":"Chiku-Chiku (チクチク)","meaning":"Prickly / Stinging / Pins and needles","example":"This wool sweater is so chiku-chiku on my skin.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Also used for passive-aggressive comments — 'chiku-chiku words' that sting emotionally"},
+{"word":"Hiri-Hiri (ヒリヒリ)","meaning":"Burning / Stinging / Raw","example":"My sunburn is hiri-hiri every time I move.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"That raw, burning sensation — like rubbing alcohol on a cut"},
+{"word":"Goro-Goro (ゴロゴロ)","meaning":"Stomach rumbling / Tummy growling","example":"My stomach was goro-goro during the quiet meeting.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Also means lounging around doing nothing — and the sound of thunder!"},
+{"word":"Fura-Fura (フラフラ)","meaning":"Wobbly / Unsteady / About to pass out","example":"After the marathon, I was completely fura-fura.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Can describe physical unsteadiness OR someone who drifts through life without direction"},
+{"word":"Jin-Jin (ジンジン)","meaning":"Tingling / Numb / Throbbing","example":"My fingers are jin-jin from the cold.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"That pins-and-needles sensation when blood flow returns to a numb limb"},
+{"word":"Zaa-Zaa (ザーザー)","meaning":"Pouring / Coming down in buckets / Torrential","example":"It's been raining zaa-zaa all day — I'm soaked.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"The sound of heavy rain hitting surfaces — one of the first onomatopoeia Japanese children learn"},
+{"word":"Shito-Shito (シトシト)","meaning":"Drizzling / Light rain / Sprinkling","example":"A gentle shito-shito rain was falling on the garden.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Quiet, gentle rain — the kind that's almost romantic. Contrast with zaa-zaa (heavy rain)"},
+{"word":"Byuu-Byuu (ビュービュー)","meaning":"Howling wind / Gusting / Blustery","example":"The wind was byuu-byuu outside the window all night.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Specifically for strong, whistling wind — the kind that makes you pull your coat tighter"},
+{"word":"Kira-Kira (キラキラ)","meaning":"Sparkling / Glittering / Twinkling","example":"The city lights were kira-kira from the hilltop.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Also used to describe someone with a bright, radiant personality — 'kira-kira eyes'"},
+{"word":"Poka-Poka (ポカポカ)","meaning":"Nice and warm / Toasty / Balmy","example":"It's such a poka-poka day — perfect for a picnic.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"That gentle, pleasant warmth — like sitting in a sunbeam. NOT hot, just perfectly warm"},
+{"word":"Jime-Jime (ジメジメ)","meaning":"Muggy / Humid / Sticky","example":"Tokyo summers are so jime-jime — I can't stand the humidity.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Every foreigner's first complaint about Japanese summer — the jime-jime is real"},
+{"word":"Bata-Bata (バタバタ)","meaning":"Hectic / Running around / In a rush","example":"Sorry I couldn't reply — work has been bata-bata all week.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"The sound of frantic footsteps — perfectly captures the chaos of a busy day"},
+{"word":"Dara-Dara (ダラダラ)","meaning":"Lounging around / Slacking off / Dragging on","example":"I spent the whole Sunday dara-dara on the couch.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Also describes sweat dripping or a meeting that goes on forever — anything that drags"},
+{"word":"Teki-Paki (テキパキ)","meaning":"Efficient / On the ball / Getting things done","example":"She handled the crisis teki-paki — everything was resolved in an hour.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"The opposite of dara-dara — someone who works with crisp, decisive efficiency"},
+{"word":"Uro-Uro (ウロウロ)","meaning":"Wandering around / Pacing / Loitering","example":"He was uro-uro around the station looking lost.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Can have a suspicious nuance — security guards watch people who are uro-uro"},
+{"word":"Goso-Goso (ゴソゴソ)","meaning":"Rummaging / Rustling / Fumbling around","example":"I could hear her goso-goso through her bag looking for keys.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"The sound of searching through things — bags, drawers, pockets"},
+{"word":"Mogu-Mogu (モグモグ)","meaning":"Munching / Chewing / Chomping","example":"The hamster was mogu-mogu on a sunflower seed.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Became a popular ASMR keyword — mogu-mogu eating videos are huge on YouTube"},
+{"word":"Gatsu-Gatsu (ガツガツ)","meaning":"Wolfing down / Scarfing / Devouring","example":"He was gatsu-gatsu eating like he hadn't had food in days.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Has a slightly rude nuance — eating aggressively without manners"},
+{"word":"Pera-Pera (ペラペラ)","meaning":"Fluent / Smooth talker / Chattering away","example":"She speaks pera-pera English — totally fluent.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"One of the highest compliments for a language learner in Japan — 'Nihongo pera-pera!'"},
+{"word":"Boh-tto (ボーッと)","meaning":"Spacing out / Zoning out / In a daze","example":"I was just boh-tto staring out the window during the meeting.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"That blank, empty-headed state — your body is there but your mind is elsewhere"},
+{"word":"Niko-Niko (ニコニコ)","meaning":"Beaming / All smiles / Grinning ear to ear","example":"She was niko-niko the whole day after the good news.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"The famous Japanese video platform 'Niconico' is named after this word"},
+{"word":"Butsu-Butsu (ブツブツ)","meaning":"Muttering / Grumbling / Mumbling","example":"He was butsu-butsu complaining about the new policy.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Low-volume complaining that everyone can still hear — passive-aggressive grumbling"},
+{"word":"Don-Don (ドンドン)","meaning":"Banging / Pounding / Thumping","example":"Someone was don-don knocking on the door at midnight.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Also means 'rapidly' or 'more and more' — 'don-don growing' = growing rapidly"},
+{"word":"Gacha-Gacha (ガチャガチャ)","meaning":"Clanking / Rattling / Clattering","example":"The keys were gacha-gacha in his pocket as he ran.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Also the name for capsule toy machines (Gachapon) — from the sound of turning the handle"},
+{"word":"Pachi-Pachi (パチパチ)","meaning":"Clapping / Crackling / Snapping","example":"The audience went pachi-pachi after the performance.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Also the sound of a campfire crackling — or the snap of static electricity"},
+{"word":"Kachi-Kachi (カチカチ)","meaning":"Clicking / Ticking / Rock-hard","example":"The frozen ground was kachi-kachi this morning.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"From the famous folktale 'Kachi-Kachi Yama' — where a tanuki's back goes kachi-kachi on fire"},
+{"word":"Bento (弁当)","meaning":"Packed lunch box","example":"I grabbed a bento from the convenience store for lunch.","category":"Japanese to English","era":"Edo Period Origin","trivia":"The word 'bento' entered English dictionaries in the 1990s — now used worldwide"},
+{"word":"Ramen (ラーメン)","meaning":"Japanese noodle soup","example":"There's a new ramen shop downtown — the tonkotsu is amazing.","category":"Japanese to English","era":"Early 1900s","trivia":"Originally from Chinese 'la mian' (pulled noodles) — adapted and transformed in Japan"},
+{"word":"Sushi (寿司)","meaning":"Vinegared rice with toppings","example":"Let's grab sushi for dinner tonight.","category":"Japanese to English","era":"Edo Period Origin","trivia":"Originally a preservation method — fish was fermented with rice, which was then discarded"},
+{"word":"Sashimi (刺身)","meaning":"Sliced raw fish","example":"The salmon sashimi at that place is incredibly fresh.","category":"Japanese to English","era":"Muromachi Period","trivia":"Literally means 'pierced body' — from the practice of pinning the fish's tail to identify it"},
+{"word":"Tempura (天ぷら)","meaning":"Battered and deep-fried food","example":"Shrimp tempura is my go-to order at Japanese restaurants.","category":"Japanese to English","era":"1600s","trivia":"Likely derived from Portuguese 'tempero' (seasoning) — introduced by Portuguese missionaries"},
+{"word":"Tofu (豆腐)","meaning":"Soybean curd","example":"I've been adding tofu to my smoothies for extra protein.","category":"Japanese to English","era":"Ancient","trivia":"Originated in China over 2,000 years ago — the word entered English via Japanese pronunciation"},
+{"word":"Wasabi (わさび)","meaning":"Japanese horseradish","example":"Be careful with the wasabi — a little goes a long way.","category":"Japanese to English","era":"Timeless","trivia":"Real wasabi is extremely expensive — most 'wasabi' outside Japan is actually dyed horseradish"},
+{"word":"Sake (酒)","meaning":"Japanese rice wine","example":"Would you like hot or cold sake with your meal?","category":"Japanese to English","era":"Ancient","trivia":"In Japanese, 'sake' actually means any alcohol — the rice wine is specifically 'nihonshu'"},
+{"word":"Matcha (抹茶)","meaning":"Powdered green tea","example":"Matcha lattes have become a global cafe staple.","category":"Japanese to English","era":"1100s","trivia":"Brought to Japan from China by Zen monks — the tea ceremony elevated it to an art form"},
+{"word":"Edamame (枝豆)","meaning":"Boiled young soybeans","example":"Edamame is the perfect healthy snack with beer.","category":"Japanese to English","era":"Timeless","trivia":"Literally means 'stem beans' — they're harvested while still on the branch"},
+{"word":"Umami (旨味)","meaning":"The fifth taste — savory","example":"Parmesan cheese is packed with umami flavor.","category":"Japanese to English","era":"1908","trivia":"Discovered by Dr. Kikunae Ikeda in 1908 — it took nearly 100 years for Western science to officially recognize it"},
+{"word":"Teriyaki (照り焼き)","meaning":"Sweet soy glaze cooking style","example":"Teriyaki chicken is one of the most popular Japanese dishes worldwide.","category":"Japanese to English","era":"1600s","trivia":"Teri = shine/glaze, yaki = grilled — the shiny glaze gives it its name"},
+{"word":"Gyoza (餃子)","meaning":"Japanese dumplings","example":"Nothing beats freshly pan-fried gyoza with a crispy bottom.","category":"Japanese to English","era":"Post-WWII","trivia":"Japanese soldiers brought the recipe back from China after WWII — adapted with thinner wrappers"},
+{"word":"Wagyu (和牛)","meaning":"Premium Japanese beef","example":"A5 Wagyu literally melts in your mouth.","category":"Japanese to English","era":"Modern","trivia":"Wa = Japanese, gyu = cow — the intense marbling comes from specific breeding practices"},
+{"word":"Miso (味噌)","meaning":"Fermented soybean paste","example":"A warm bowl of miso soup is the ultimate comfort food.","category":"Japanese to English","era":"Ancient","trivia":"Mi = taste, so = noisy — possibly because it 'brings flavor to life'"},
+{"word":"Karaoke (カラオケ)","meaning":"Singing to recorded music","example":"Friday night karaoke is a tradition in Japan.","category":"Japanese to English","era":"1970s","trivia":"Kara = empty + orchestra = 'empty orchestra' — invented by Daisuke Inoue in 1971"},
+{"word":"Emoji (絵文字)","meaning":"Digital pictograms","example":"I can't text without using at least five emoji per message.","category":"Japanese to English","era":"1999","trivia":"E = picture + moji = character — created by Shigetaka Kurita for NTT DoCoMo's i-mode"},
+{"word":"Kaizen (改善)","meaning":"Continuous improvement","example":"Toyota's kaizen philosophy revolutionized manufacturing worldwide.","category":"Japanese to English","era":"Post-WWII","trivia":"Kai = change + zen = good — became a global business buzzword through Toyota Production System"},
+{"word":"Tsunami (津波)","meaning":"Tidal wave","example":"The 2011 tsunami devastated the coast of northeastern Japan.","category":"Japanese to English","era":"1896","trivia":"Tsu = harbor + nami = wave — entered English after the 1896 Meiji Sanriku tsunami"},
+{"word":"Zen (禅)","meaning":"Buddhist meditation / Calm state","example":"I need to find my zen before this presentation.","category":"Japanese to English","era":"Ancient","trivia":"From Chinese 'Chan', itself from Sanskrit 'Dhyana' — traveled from India to China to Japan to English"},
+{"word":"Origami (折り紙)","meaning":"Paper folding art","example":"She made an origami crane in under a minute.","category":"Japanese to English","era":"Edo Period","trivia":"Ori = fold + kami/gami = paper — the thousand crane tradition symbolizes healing"},
+{"word":"Bonsai (盆栽)","meaning":"Miniature tree cultivation","example":"His bonsai collection is over 30 years old.","category":"Japanese to English","era":"Ancient","trivia":"Bon = tray + sai = planting — originated in China as 'penzai', refined in Japan"},
+{"word":"Futon (布団)","meaning":"Japanese bedding / Thin mattress","example":"In Japan, you fold up your futon every morning to save space.","category":"Japanese to English","era":"Timeless","trivia":"Western 'futons' are very different — in Japan, a futon is thin and placed on tatami floors"},
+{"word":"Kimono (着物)","meaning":"Traditional Japanese garment","example":"She wore a beautiful kimono to the New Year's celebration.","category":"Japanese to English","era":"Heian Period","trivia":"Ki = wear + mono = thing — literally 'thing to wear'. Originally just meant 'clothing'"},
+{"word":"Samurai (侍)","meaning":"Japanese warrior","example":"The samurai code of bushido emphasized honor above all.","category":"Japanese to English","era":"Feudal Japan","trivia":"From 'saburau' meaning 'to serve' — samurai were originally servants to nobility"},
+{"word":"Ninja (忍者)","meaning":"Covert agent / Assassin","example":"Ninjas were masters of stealth and espionage.","category":"Japanese to English","era":"Feudal Japan","trivia":"Nin = endure/hide + ja = person — real ninjas were spies, not the acrobatic warriors of movies"},
+{"word":"Sensei (先生)","meaning":"Teacher / Master","example":"My karate sensei has been training for 40 years.","category":"Japanese to English","era":"Timeless","trivia":"Sen = before + sei = born — literally 'one who was born before' = someone with more experience"},
+{"word":"Sumo (相撲)","meaning":"Japanese wrestling","example":"Sumo tournaments in Tokyo attract thousands of spectators.","category":"Japanese to English","era":"Ancient","trivia":"Sumo has Shinto religious origins — the ring (dohyo) is considered sacred ground"},
+{"word":"Judo (柔道)","meaning":"Martial art — the gentle way","example":"Judo became an Olympic sport in 1964 at the Tokyo Games.","category":"Japanese to English","era":"1882","trivia":"Ju = gentle + do = way — founded by Jigoro Kano, who emphasized technique over brute strength"},
+{"word":"Karate (空手)","meaning":"Martial art — empty hand","example":"He earned his black belt in karate after years of training.","category":"Japanese to English","era":"1900s","trivia":"Kara = empty + te = hand — originated in Okinawa, influenced by Chinese martial arts"},
+{"word":"Sudoku (数独)","meaning":"Number puzzle","example":"I do a sudoku puzzle every morning with my coffee.","category":"Japanese to English","era":"1986","trivia":"Su = number + doku = single — actually based on a Swiss puzzle, but named and popularized in Japan"},
+{"word":"Rickshaw (人力車)","meaning":"Human-pulled cart","example":"We took a rickshaw ride through the old streets of Kyoto.","category":"Japanese to English","era":"1869","trivia":"From jinrikisha — jin = human + riki = power + sha = vehicle"},
+{"word":"Tycoon (大君)","meaning":"Wealthy business leader","example":"The tech tycoon donated millions to charity.","category":"Japanese to English","era":"1850s","trivia":"From taikun = 'great lord' — used by the Shogun when dealing with foreigners"},
+{"word":"Skosh (少し)","meaning":"A small amount","example":"Could you move over just a skosh?","category":"Japanese to English","era":"1950s","trivia":"US military slang from 'sukoshi' — American soldiers stationed in Japan brought it home"},
+{"word":"Honcho (班長)","meaning":"Boss / Leader","example":"Who's the head honcho around here?","category":"Japanese to English","era":"1940s","trivia":"From hancho = squad leader — another word American POWs and soldiers brought back from Japan"},
+{"word":"Koi (鯉)","meaning":"Ornamental carp","example":"The koi pond in the Japanese garden was stunning.","category":"Japanese to English","era":"Timeless","trivia":"Koi can live over 200 years — the oldest recorded koi, 'Hanako', was 226 years old"},
+{"word":"Wabi-Sabi (侘び寂び)","meaning":"Beauty in imperfection","example":"The cracked pottery has a wabi-sabi charm to it.","category":"Japanese to English","era":"Muromachi Period","trivia":"Wabi = rustic simplicity + sabi = patina of age — a core aesthetic philosophy in Japanese culture"},
+{"word":"Komorebi (木漏れ日)","meaning":"Sunlight filtering through leaves","example":"We sat under the trees enjoying the komorebi.","category":"Japanese to English","era":"Timeless","trivia":"Ko = tree + more = leak + bi = sunlight — one of those 'untranslatable' Japanese words"},
+{"word":"Shinrin-yoku (森林浴)","meaning":"Forest bathing","example":"Doctors in Japan actually prescribe shinrin-yoku for stress relief.","category":"Japanese to English","era":"1982","trivia":"Shinrin = forest + yoku = bath — coined by Japan's Ministry of Agriculture in 1982"},
+{"word":"Sakura (桜)","meaning":"Cherry blossom","example":"Sakura season in Japan is absolutely magical.","category":"Japanese to English","era":"Timeless","trivia":"Sakura blooming is tracked nationally — the 'cherry blossom forecast' is a major annual event"},
+{"word":"Otaku (オタク)","meaning":"Obsessive fan / Geek","example":"He's a total anime otaku — his room is full of figurines.","category":"Japanese to English","era":"1980s","trivia":"Originally a polite word for 'your house' — became slang for someone who never leaves home"},
+{"word":"Manga (漫画)","meaning":"Japanese comics","example":"One Piece is the best-selling manga series of all time.","category":"Japanese to English","era":"1800s","trivia":"Man = whimsical + ga = pictures — the modern manga industry generates over $5 billion annually"},
+{"word":"Anime (アニメ)","meaning":"Japanese animation","example":"Studio Ghibli produces some of the most beautiful anime films.","category":"Japanese to English","era":"1960s","trivia":"Shortened from 'animation' — in Japan ALL animation is 'anime', but in English it means Japanese style"},
+{"word":"Cosplay (コスプレ)","meaning":"Costume play","example":"The cosplay at Comic-Con gets more impressive every year.","category":"Japanese to English","era":"1984","trivia":"Coined by Japanese reporter Nobuyuki Takahashi after attending the 1984 World Science Fiction Convention"},
+{"word":"Kawaii (可愛い)","meaning":"Cute / Adorable","example":"Hello Kitty is the ultimate kawaii icon.","category":"Japanese to English","era":"1970s","trivia":"Kawaii culture is a massive economic force — the 'cute economy' in Japan is worth billions"},
+{"word":"Senpai (先輩)","meaning":"Senior / Upperclassman","example":"I hope senpai notices me today.","category":"Japanese to English","era":"Timeless","trivia":"The 'notice me senpai' meme made this word globally famous — originally a respectful term"},
+{"word":"Chibi (ちび)","meaning":"Small / Cute character style","example":"The artist drew chibi versions of all the characters.","category":"Japanese to English","era":"Modern","trivia":"Can be slightly rude in Japanese (like 'shorty') — but in English it's purely an art style term"},
+{"word":"Salary Man (サラリーマン)","meaning":"Office worker / White-collar worker","example":"In English, say 'office worker' — 'salary man' sounds very Japanese-specific.","category":"Wasei-Eigo","era":"Post-WWII","trivia":"The image of a salaryman in a dark suit became an icon of Japan's economic miracle"},
+{"word":"OL / Office Lady (OL)","meaning":"Female office worker","example":"Just say 'office worker' — 'OL' is not used in English-speaking countries.","category":"Wasei-Eigo","era":"1960s","trivia":"Replaced the older term 'BG' (Business Girl) which had unfortunate connotations in English"},
+{"word":"Mansion (マンション)","meaning":"Apartment / Condo","example":"In English, a 'mansion' is a huge luxury house — not an apartment building!","category":"Wasei-Eigo","era":"1960s","trivia":"Japanese real estate ads for a 1LDK 'mansion' would confuse English speakers expecting a palace"},
+{"word":"Consent (コンセント)","meaning":"Outlet / Power socket","example":"'Where's the consent?' would very much confuse an English speaker — say 'outlet' or 'socket'.","category":"Wasei-Eigo","era":"Early 1900s","trivia":"Likely from 'concentric plug' — in English 'consent' = permission/agreement"},
+{"word":"Claim (クレーム)","meaning":"Complaint","example":"In English, 'claim' means to assert something — use 'complaint' for クレーム.","category":"Wasei-Eigo","era":"Modern","trivia":"A Japanese customer making a 'claim' at a store is actually filing a complaint — very different meanings"},
+{"word":"Reform (リフォーム)","meaning":"Renovation / Remodel","example":"'We reformed our kitchen' sounds like a political revolution — say 'renovated' instead.","category":"Wasei-Eigo","era":"Modern","trivia":"English 'reform' = changing systems/laws for the better — not fixing your bathroom"},
+{"word":"Morning Call (モーニングコール)","meaning":"Wake-up call","example":"Ask the hotel for a 'wake-up call' — 'morning call' won't be understood.","category":"Wasei-Eigo","era":"Modern","trivia":"Hotels worldwide use 'wake-up call' — 'morning call' is a uniquely Japanese-English creation"},
+{"word":"Free Dial (フリーダイヤル)","meaning":"Toll-free number","example":"In English, it's a 'toll-free number' or '1-800 number' — not 'free dial'.","category":"Wasei-Eigo","era":"1985","trivia":"フリーダイヤル is actually an NTT trademark in Japan — it became the generic term"},
+{"word":"Gasoline Stand (ガソリンスタンド)","meaning":"Gas station / Petrol station","example":"Say 'gas station' (US) or 'petrol station' (UK) — nobody says 'gasoline stand'.","category":"Wasei-Eigo","era":"Modern","trivia":"The 'stand' part might come from German 'Tankstelle' influence"},
+{"word":"Apart (アパート)","meaning":"Apartment","example":"'I live in an apart' makes no sense in English — say 'apartment'.","category":"Wasei-Eigo","era":"Modern","trivia":"In Japan, アパート usually means a cheaper wooden building vs マンション (concrete)"},
+{"word":"Pierce (ピアス)","meaning":"Earrings / Ear piercings","example":"'Nice pierce!' would confuse people — say 'nice earrings!' instead.","category":"Wasei-Eigo","era":"Modern","trivia":"English 'pierce' is a verb (to make a hole) — the noun for the jewelry is 'earrings'"},
+{"word":"Parker (パーカー)","meaning":"Hoodie","example":"In English, a 'parker' is someone who parks cars — say 'hoodie' for パーカー.","category":"Wasei-Eigo","era":"Modern","trivia":"Possibly derived from 'parka' (a type of jacket) — evolved in Japanese to mean any hooded sweatshirt"},
+{"word":"One Piece (ワンピース)","meaning":"Dress","example":"Say 'dress' — 'one piece' in English usually refers to a swimsuit or the manga.","category":"Wasei-Eigo","era":"Modern","trivia":"In English, 'one-piece' typically means a one-piece swimsuit — not a casual dress"},
+{"word":"No Sleeve (ノースリーブ)","meaning":"Sleeveless top / Tank top","example":"Say 'sleeveless top' or 'tank top' — 'no sleeve' sounds like broken English.","category":"Wasei-Eigo","era":"Modern","trivia":"English uses adjective form 'sleeveless' — not the literal 'no sleeve' construction"},
+{"word":"Chuck (チャック)","meaning":"Zipper","example":"'Your chuck is open' would be very confusing — say 'your zipper is open'.","category":"Wasei-Eigo","era":"1927","trivia":"Named after 'Chack' brand fasteners — in English, 'chuck' means to throw something"},
+{"word":"Viking (バイキング)","meaning":"Buffet / All-you-can-eat","example":"Say 'buffet' — calling it 'viking' will get very confused looks.","category":"Wasei-Eigo","era":"1958","trivia":"Started when Imperial Hotel Tokyo named their buffet 'Viking' after a Scandinavian smorgasbord"},
+{"word":"American Coffee (アメリカンコーヒー)","meaning":"Weak/light coffee","example":"In America, just say 'light roast' or 'drip coffee' — 'American coffee' isn't a thing.","category":"Wasei-Eigo","era":"Modern","trivia":"Ironically, 'Americano' (espresso + water) exists in English — but it's not what Japanese mean"},
+{"word":"Shoe Cream (シュークリーム)","meaning":"Cream puff","example":"Asking for 'shoe cream' in English will get you shoe polish — say 'cream puff'!","category":"Wasei-Eigo","era":"Modern","trivia":"From French 'chou a la creme' — 'chou' (cabbage) became 'shoe' in Japanese pronunciation"},
+{"word":"Fried Potato (フライドポテト)","meaning":"French fries / Chips (UK)","example":"Say 'fries' (US) or 'chips' (UK) — 'fried potato' sounds like a cooking instruction.","category":"Wasei-Eigo","era":"Modern","trivia":"Americans say 'fries', British say 'chips', Japanese say 'fried potato' — everyone's confused"},
+{"word":"Soft Cream (ソフトクリーム)","meaning":"Soft serve ice cream","example":"Say 'soft serve' — 'soft cream' sounds like a skincare product.","category":"Wasei-Eigo","era":"1951","trivia":"Soft serve was introduced to Japan in 1951 at a US military base"},
+{"word":"Note PC (ノートパソコン)","meaning":"Laptop","example":"Say 'laptop' — 'note PC' or 'note personal computer' isn't used in English.","category":"Wasei-Eigo","era":"1990s","trivia":"Japanese also says 'pasokon' for PC — itself a wasei-eigo shortening of 'personal computer'"},
+{"word":"Key Holder (キーホルダー)","meaning":"Keychain / Key ring","example":"Say 'keychain' — a 'key holder' in English is a person who holds keys.","category":"Wasei-Eigo","era":"Modern","trivia":"In English, 'key holder' can also mean someone authorized to access a building"},
+{"word":"Sign (サイン)","meaning":"Autograph / Signature","example":"'Can I have your sign?' sounds odd — say 'Can I have your autograph?'","category":"Wasei-Eigo","era":"Modern","trivia":"English 'sign' = a posted notice or the verb 'to sign'. For celebrity signatures, use 'autograph'"},
+{"word":"Hotchkiss (ホッチキス)","meaning":"Stapler","example":"Nobody outside Japan knows what a 'Hotchkiss' is — say 'stapler'.","category":"Wasei-Eigo","era":"Early 1900s","trivia":"Named after Benjamin Hotchkiss, whose company made early staplers imported to Japan"},
+{"word":"Sellotape (セロテープ)","meaning":"Scotch tape / Adhesive tape","example":"Say 'tape' or 'Scotch tape' (US) or 'Sellotape' (UK) — though Sellotape IS used in British English!","category":"Wasei-Eigo","era":"1930s","trivia":"This one's tricky — 'Sellotape' is actually used in British English, but Americans say 'Scotch tape'"},
+{"word":"Nighter (ナイター)","meaning":"Night game","example":"Say 'night game' — 'nighter' isn't a word in English.","category":"Wasei-Eigo","era":"1950s","trivia":"Created by adding '-er' to 'night' — a very Japanese way of making English words"},
+{"word":"Dead Ball (デッドボール)","meaning":"Hit by pitch (HBP)","example":"In baseball English, it's 'hit by pitch' — 'dead ball' means something completely different.","category":"Wasei-Eigo","era":"Modern","trivia":"In English, 'dead ball' is when play is stopped — not when a batter gets hit by a pitch"},
+{"word":"Talent (タレント)","meaning":"TV personality / Celebrity","example":"In English, 'talent' means skill/ability — say 'TV personality' or 'celebrity'.","category":"Wasei-Eigo","era":"1960s","trivia":"Japanese TV 'talents' are often famous for being famous — predated Western reality TV"},
+{"word":"Game Center (ゲームセンター)","meaning":"Arcade","example":"Say 'arcade' — 'game center' sounds like a generic description, not a place.","category":"Wasei-Eigo","era":"1970s","trivia":"Japanese game centers are cultural institutions — far more elaborate than Western arcades"},
+{"word":"Print Club (プリクラ)","meaning":"Photo booth stickers","example":"'Print Club' means nothing in English — just say 'photo booth' or explain the concept.","category":"Wasei-Eigo","era":"1995","trivia":"Invented by Atlus and Sega in 1995, it became a massive cultural phenomenon"},
+{"word":"Out of the Blue","meaning":"Suddenly / Without warning / Completely unexpected","example":"She called me out of the blue after ten years of silence.","category":"Idioms & Phrases","era":"1800s","trivia":"Originally from 'a bolt out of the blue' — lightning from a clear blue sky where no storm is expected"},
+{"word":"Set Your Heart Ablaze","meaning":"Burn with unwavering passion and determination","example":"Even in his final moments, Rengoku told Tanjiro to set his heart ablaze.","category":"Anime & Manga","era":"2020","trivia":"From Demon Slayer — Rengoku's last words in the Mugen Train movie subtitle translation. The Japanese line is '心を燃やせ'"},
+{"word":"Keep Your Heart Burning","meaning":"Never let your inner fire die out","example":"Rengoku's message to keep your heart burning inspired fans worldwide.","category":"Anime & Manga","era":"2021","trivia":"The English manga translation of Rengoku's '心を燃やせ' — a softer, more enduring nuance than the movie subtitle version"},
+{"word":"Let Your Passion Burn","meaning":"Embrace your passion with full intensity","example":"His coach always told him to let your passion burn — never hold back.","category":"Anime & Manga","era":"Modern","trivia":"A common English motivational phrase that captures the spirit of 心を燃やせ — showing how anime influences modern English expression"},
+{"word":"Texting","meaning":"Sending text messages","example":"Sorry, I was texting and didn't see you wave.","category":"Modern Slang","era":"2000s","trivia":"Before smartphones, texting meant painstakingly typing on a T9 keypad — kids today will never know the struggle"},
+{"word":"Hickey","meaning":"A bruise-like mark on the skin from kissing/sucking","example":"He showed up to work with a hickey on his neck — everyone noticed.","category":"Modern Slang","era":"1934","trivia":"Also called a 'love bite' in British English — one of those words you'll never learn in a textbook but everyone knows"},
+{"word":"Picky","meaning":"Fussy / Choosy / Hard to please","example":"She's so picky about food — she won't eat anything green.","category":"Everyday English","era":"1800s","trivia":"From 'pick' (to choose carefully) — picky eaters are universal, but the word is surprisingly old"},
+{"word":"Kinky","meaning":"Unconventional / Quirky / Twisted","example":"That's a pretty kinky hairstyle — I've never seen anything like it.","category":"Everyday English","era":"1844","trivia":"Originally meant 'curly or twisted' (like kinky hair) — the suggestive meaning came much later in the 1950s"},
+{"word":"Jinx / Jinxing","meaning":"Bad luck / To bring bad luck by mentioning it","example":"Don't say we're going to win — you'll jinx it!","category":"Idioms & Phrases","era":"1911","trivia":"May come from the bird 'jynx' (wryneck) used in witchcraft — or from a 1911 baseball superstition"},
+{"word":"Keep the Change","meaning":"You don't need to give me back the difference","example":"Here's a twenty — keep the change.","category":"Everyday English","era":"Timeless","trivia":"One of the most universally understood English phrases — also a power move in tipping culture"},
+{"word":"Grumpy","meaning":"Cranky / Irritable / In a bad mood","example":"Don't talk to him before his morning coffee — he's always grumpy.","category":"Everyday English","era":"1778","trivia":"Made globally famous by Grumpy Cat (Tardar Sauce) — the internet's most beloved frown"},
+{"word":"Spoiler","meaning":"Information that ruins a surprise or plot twist","example":"No spoilers! I haven't watched the finale yet.","category":"Gaming & Internet","era":"1980s","trivia":"Originally a car part (rear wing) — the 'ruining surprises' meaning exploded with internet culture"},
+{"word":"RPG","meaning":"Role-Playing Game","example":"I've sunk 200 hours into this RPG and I'm still not done.","category":"Gaming & Internet","era":"1974","trivia":"Started with tabletop Dungeons & Dragons in 1974 — now one of the biggest video game genres worldwide"},
+{"word":"Zawa-Zawa (ざわざわ)","meaning":"Uneasy murmuring / Restless buzzing / Tension in the air","example":"The crowd went zawa-zawa when the final card was revealed.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Made iconic by the manga Kaiji — the ざわ…ざわ… sound effect became a legendary meme representing dread and tension"},
+{"word":"Baku-Baku (バクバク)","meaning":"Heart pounding / Racing heartbeat","example":"My heart was going baku-baku right before the announcement.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Stronger and more physical than doki-doki — baku-baku is when your heart feels like it might burst out of your chest"},
+{"word":"Pika-Pika (ピカピカ)","meaning":"Shiny / Gleaming / Sparkling clean","example":"She polished the car until it was pika-pika.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"Yes, Pikachu's name comes from pika-pika (sparkle) + chu (the sound of a mouse squeak)"},
+{"word":"Kapi-Kapi (カピカピ)","meaning":"Dried out / Crusty / Flaky","example":"I left the paint out overnight and it went all kapi-kapi.","category":"Japanese Onomatopoeia","era":"Timeless","trivia":"That crusty, dried-up texture — like dried toothpaste on the cap or paint left on a palette"},
+{"word":"Wet Blanket","meaning":"A person who ruins the fun / Killjoy / Buzzkill","example":"Don't be such a wet blanket — come dance with us!","category":"Idioms & Phrases","era":"1800s","trivia":"A literal wet blanket was used to smother fires — so a 'wet blanket' person smothers everyone's fun"},
+{"word":"Snitch","meaning":"Tattletale / Informer / Someone who reports others","example":"Nobody likes a snitch — but he told the teacher anyway.","category":"Everyday English","era":"1700s","trivia":"Also famous from Harry Potter as the Golden Snitch — but the slang meaning is much older, from thieves' cant"},
+
+];
+
+// ============================================
+// SIDEBAR CATEGORY & ERA MANAGEMENT
+// ============================================
+var currentCategory = 'all';
+var currentEra = 'all';
+
+function buildSidebar(){
+    var cats = {};
+    var eras = {};
+    LINGO_DATA.forEach(function(item){
+        cats[item.category] = (cats[item.category]||0) + 1;
+        if(item.era) eras[item.era] = (eras[item.era]||0) + 1;
+    });
+    var catHtml = '';
+    Object.keys(cats).sort().forEach(function(cat){
+        catHtml += '<button class="cat-btn" onclick="setCategory(\'' + cat.replace(/'/g,"\\'") + '\')">' + cat + ' (' + cats[cat] + ')</button>';
+    });
+    document.getElementById('categoryList').innerHTML = catHtml;
+    var eraHtml = '<button class="cat-btn active" onclick="setEra(\'all\')">All Eras</button>';
+    Object.keys(eras).sort().forEach(function(era){
+        eraHtml += '<button class="cat-btn" onclick="setEra(\'' + era + '\')">' + era + ' (' + eras[era] + ')</button>';
+    });
+    document.getElementById('eraList').innerHTML = eraHtml;
+    document.getElementById('counter').textContent = LINGO_DATA.length + ' expressions';
+}
+
+function setCategory(cat){
+    currentCategory = cat;
+    currentEra = 'all';
+    currentSearch = '';
+    document.getElementById('searchBox').value = '';
+    var allBtns = document.querySelectorAll('#categoryList .cat-btn');
+    allBtns.forEach(function(b){b.classList.remove('active');});
+    if(event && event.target) event.target.classList.add('active');
+    var eraBtns = document.querySelectorAll('#eraList .cat-btn');
+    eraBtns.forEach(function(b){b.classList.remove('active');});
+    eraBtns.forEach(function(b){if(b.textContent.indexOf('All')===0) b.classList.add('active');});
+    renderCards();
+}
+
+function setEra(era){
+    currentEra = era;
+    currentCategory = 'all';
+    currentSearch = '';
+    document.getElementById('searchBox').value = '';
+    var catBtns = document.querySelectorAll('#categoryList .cat-btn');
+    catBtns.forEach(function(b){b.classList.remove('active');});
+    var eraBtns = document.querySelectorAll('#eraList .cat-btn');
+    eraBtns.forEach(function(b){b.classList.remove('active');});
+    if(event && event.target) event.target.classList.add('active');
+    renderCards();
+}
+
+// ============================================
+// BOOT SCREEN
+// ============================================
+
+var bootIcons = ['\uD83D\uDC3E\uD83E\uDE84\uD83C\uDFAD\uD83D\uDC3E','\uD83D\uDC3E\uD83E\uDE84\uD83C\uDF0D\uD83D\uDC3E','\uD83D\uDC3E\uD83E\uDE84\uD83D\uDCD6\uD83D\uDC3E'];
+function runBoot(){
+    var icon = bootIcons[Math.floor(Math.random()*bootIcons.length)];
+    document.getElementById('bootIcon').textContent = icon;
+    var bar = document.getElementById('bootBar');
+    var w = 0;
+    var iv = setInterval(function(){
+        w += Math.random()*15+5;
+        if(w>=100){w=100;clearInterval(iv);
+            setTimeout(function(){
+                document.getElementById('bootScreen').classList.add('fade-out');
+                setTimeout(function(){document.getElementById('bootScreen').style.display='none';},800);
+            },400);
+        }
+        bar.style.width = w+'%';
+    },120);
+}
+
+// ============================================================
+// STATE
+// ============================================================
+var currentCategory = 'all';
+var currentEra = 'all';
+var currentSearch = '';
+var quizData = [];
+var quizIndex = 0;
+var quizCorrect = 0;
+
+// ============================================================
+// SORT
+// ============================================================
+var currentSort = 'default';
+function sortCards(mode){
+    currentSort = mode;
+    document.querySelectorAll('.sidebar h3').forEach(function(h){
+        if(h.textContent === 'Sort'){
+            var btns = [];
+            var el = h.nextElementSibling;
+            while(el && el.tagName === 'BUTTON'){
+                el.classList.remove('active');
+                if(el.textContent.toLowerCase().indexOf(mode === 'az' ? 'a' : mode === 'za' ? 'z' : mode === 'old' ? 'old' : mode === 'new' ? 'new' : 'shuf') === 0){
+                    el.classList.add('active');
+                }
+                el = el.nextElementSibling;
+            }
+        }
+    });
+    renderCards();
+}
+
+// ============================================================
+// SEARCH & ERA FILTER
+// ============================================================
+document.getElementById('searchBox').addEventListener('input',function(){
+    currentSearch = this.value.toLowerCase();
+    renderCards();
+});
+
+// ============================================================
+// FILTER LOGIC
+// ============================================================
+function getFiltered(){
+    var filtered = LINGO_DATA.filter(function(item){
+        if(currentCategory !== 'all' && item.category !== currentCategory) return false;
+        if(currentEra !== 'all' && item.era !== currentEra) return false;
+        if(currentSearch){
+            var s = currentSearch;
+            var match = (item.word||'').toLowerCase().indexOf(s)!==-1 ||
+                        (item.meaning||'').toLowerCase().indexOf(s)!==-1 ||
+                        (item.example||'').toLowerCase().indexOf(s)!==-1 ||
+                        (item.source||'').toLowerCase().indexOf(s)!==-1 ||
+                        (item.trivia||'').toLowerCase().indexOf(s)!==-1 ||
+                        (item.category||'').toLowerCase().indexOf(s)!==-1;
+            if(!match) return false;
+        }
+        return true;
+    });
+    if(currentSort === 'az') filtered.sort(function(a,b){ return a.word.localeCompare(b.word); });
+    else if(currentSort === 'za') filtered.sort(function(a,b){ return b.word.localeCompare(a.word); });
+    else if(currentSort === 'old') filtered.sort(function(a,b){ return (a.era||'').localeCompare(b.era||''); });
+    else if(currentSort === 'new') filtered.sort(function(a,b){ return (b.era||'').localeCompare(a.era||''); });
+    else if(currentSort === 'shuffle') filtered.sort(function(){ return Math.random()-0.5; });
+    return filtered;
+}
+
+// ============================================================
+// RENDER CARDS
+// ============================================================
+function renderCards(){
+    var filtered = getFiltered();
+    var grid = document.getElementById('cardGrid');
+    var noResults = document.getElementById('noResults');
+    document.getElementById('counterBadge').textContent = filtered.length + ' / ' + LINGO_DATA.length + ' expressions';
+    document.getElementById('counter').textContent = filtered.length + ' / ' + LINGO_DATA.length;
+
+    if(filtered.length === 0){
+        grid.innerHTML = '';
+        noResults.style.display = 'block';
+        return;
+    }
+    noResults.style.display = 'none';
+
+    var html = '';
+    filtered.forEach(function(item, idx){
+        html += '<div class="card" onclick="toggleCard(this, event)">';
+        html += '<span class="card-era">' + (item.era||'') + '</span>';
+        html += '<div class="card-category">' + (item.category||'') + '</div>';
+        html += '<div class="card-word">' + (item.word||'') + '</div>';
+        html += '<div class="card-meaning">' + (item.meaning||'') + '</div>';
+        html += '<div class="card-example">' + (item.example||'') + '</div>';
+        if(item.source) html += '<div class="card-source">\uD83C\uDFAC ' + item.source + '</div>';
+        if(item.trivia) html += '<div class="card-trivia">\uD83D\uDCA1 ' + item.trivia + '</div>';
+        html += '</div>';
+    });
+    grid.innerHTML = html;
+}
+
+var selectedCards = [];
+function toggleCard(el, event){
+    if(event && (event.ctrlKey || event.metaKey)){
+        el.classList.toggle('selected');
+    } else {
+        var wasSelected = el.classList.contains('selected');
+        document.querySelectorAll('.card.selected').forEach(function(c){c.classList.remove('selected');});
+        if(!wasSelected) el.classList.add('selected');
+        el.classList.toggle('expanded');
+    }
+    updateSelectedBar();
+}
+function updateSelectedBar(){
+    var sel = document.querySelectorAll('.card.selected');
+    var bar = document.getElementById('selectedBar');
+    document.getElementById('selectedCount').textContent = sel.length + ' selected';
+    bar.classList.toggle('active', sel.length > 0);
+}
+function copySelected(){
+    var sel = document.querySelectorAll('.card.selected');
+    var lines = [];
+    sel.forEach(function(c){
+        var word = c.querySelector('.card-word');
+        var cat = c.querySelector('.card-category');
+        if(word) lines.push((cat?cat.textContent+': ':'') + word.textContent);
+    });
+    if(navigator.clipboard){
+        navigator.clipboard.writeText(lines.join('\n'));
+        document.getElementById('selectedCount').textContent = 'Copied ' + lines.length + ' items!';
+        setTimeout(updateSelectedBar, 2000);
+    }
+}
+function clearSelected(){
+    document.querySelectorAll('.card.selected').forEach(function(c){c.classList.remove('selected');});
+    updateSelectedBar();
+}
+
+// ============================================================
+// RANDOM
+// ============================================================
+function showRandom(){
+    var idx = Math.floor(Math.random()*LINGO_DATA.length);
+    var item = LINGO_DATA[idx];
+    currentCategory = 'all';
+    currentEra = 'all';
+    currentSearch = item.word.toLowerCase();
+    document.getElementById('searchBox').value = item.word;
+    var catBtns = document.querySelectorAll('#categoryList .cat-btn');
+    catBtns.forEach(function(b){b.classList.remove('active');});
+    var eraBtns = document.querySelectorAll('#eraList .cat-btn');
+    eraBtns.forEach(function(b){b.classList.remove('active');});
+    eraBtns.forEach(function(b){if(b.textContent.indexOf('All')===0) b.classList.add('active');});
+    renderCards();
+}
+
+// ============================================================
+// QUIZ MODE
+// ============================================================
+function startQuiz(){
+    var pool = getFiltered();
+    if(pool.length < 4){alert('Need at least 4 expressions for quiz!');return;}
+    quizData = shuffle(pool.slice()).slice(0,10);
+    quizIndex = 0;
+    quizCorrect = 0;
+    document.getElementById('quizOverlay').classList.add('active');
+    showQuizQuestion();
+}
+
+function closeQuiz(){
+    document.getElementById('quizOverlay').classList.remove('active');
+}
+
+function showQuizQuestion(){
+    if(quizIndex >= quizData.length){
+        document.getElementById('quizQuestion').textContent = 'Quiz Complete!';
+        document.getElementById('quizOptions').innerHTML = '';
+        document.getElementById('quizScore').textContent = 'Score: ' + quizCorrect + ' / ' + quizData.length;
+        document.getElementById('quizNext').style.display = 'none';
+        return;
+    }
+    var q = quizData[quizIndex];
+    document.getElementById('quizQuestion').innerHTML = 'What does <b style="color:#39ff14">"' + q.word + '"</b> mean?';
+    document.getElementById('quizScore').textContent = 'Question ' + (quizIndex+1) + ' / ' + quizData.length + ' | Score: ' + quizCorrect;
+    document.getElementById('quizNext').style.display = 'none';
+
+    var wrongPool = LINGO_DATA.filter(function(x){return x.word !== q.word;});
+    var wrongs = shuffle(wrongPool).slice(0,3);
+    var options = shuffle([q].concat(wrongs));
+
+    var html = '';
+    options.forEach(function(opt){
+        html += '<div class="quiz-option" data-correct="'+(opt.word===q.word)+'" onclick="checkAnswer(this,\''+q.word.replace(/'/g,"\\'")+'\')">';
+        html += opt.meaning;
+        html += '</div>';
+    });
+    document.getElementById('quizOptions').innerHTML = html;
+}
+
+function checkAnswer(el, correctWord){
+    var opts = document.querySelectorAll('.quiz-option');
+    var isCorrect = el.getAttribute('data-correct') === 'true';
+    if(isCorrect){
+        el.classList.add('correct');
+        quizCorrect++;
+    } else {
+        el.classList.add('wrong');
+        opts.forEach(function(o){if(o.getAttribute('data-correct')==='true') o.classList.add('correct');});
+    }
+    opts.forEach(function(o){o.style.pointerEvents='none';});
+    document.getElementById('quizScore').textContent = 'Question ' + (quizIndex+1) + ' / ' + quizData.length + ' | Score: ' + quizCorrect;
+    document.getElementById('quizNext').style.display = 'inline-block';
+}
+
+function nextQuiz(){
+    quizIndex++;
+    showQuizQuestion();
+}
+
+function shuffle(arr){
+    for(var i=arr.length-1;i>0;i--){
+        var j=Math.floor(Math.random()*(i+1));
+        var t=arr[i];arr[i]=arr[j];arr[j]=t;
+    }
+    return arr;
+}
+
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
+document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){
+        closeQuiz();
+        document.getElementById('searchBox').value='';
+        currentSearch='';
+        renderCards();
+    }
+    if(e.key==='/' && !e.ctrlKey){
+        e.preventDefault();
+        document.getElementById('searchBox').focus();
+    }
+});
+
+// ============================================================
+// INIT
+// ============================================================
+runBoot();
+buildSidebar();
+renderCards();
+
+</script>
+
+<div class="selected-bar" id="selectedBar">
+  <span id="selectedCount">0 selected</span>
+  <div>
+    <button onclick="copySelected()">Copy Selected</button>
+    <button class="clear-btn" onclick="clearSelected()">Clear</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- FOOTER: ONE-SPONSOR BAR                                      -->
+<!-- ============================================================ -->
+<div style="
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #0a0a0a;
+  border-top: 1px solid #00ff41;
+  padding: 6px 0;
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  z-index: 9999;
+  letter-spacing: 0.5px;
+">
+  <span style="color: #00ff41;">&#9650; Presented by</span>
+  <span style="color: #888; margin: 0 4px;">|</span>
+  <a href="https://meridi-support.github.io/meridimeet/" target="_blank" rel="noopener"
+     style="color: #00ff41; text-decoration: none;">&#128197; MeridiMeet</a>
+  <span style="color: #555; margin: 0 4px;">&middot;</span>
+  <a href="https://meridi-support.github.io/meridisync-demo/" target="_blank" rel="noopener"
+     style="color: #00ff41; text-decoration: none;">&#128187; MeridiSync</a>
+  <span style="color: #555; margin: 0 4px;">&middot;</span>
+  <a href="https://github.com/meridi-support" target="_blank" rel="noopener"
+     style="color: #00ff41; text-decoration: none;">&#128049; GitHub</a>
+  <span style="color: #555; margin: 0 4px;">&middot;</span>
+  <a href="https://buymeacoffee.com/meridius4" target="_blank" rel="noopener"
+     style="color: #ffdd00; text-decoration: none;">&#9749; Buy Me a Coffee</a>
+  <span style="color: #888; margin: 0 4px;">|</span>
+  <span style="color: #555;">No Ads. No Subscriptions. Just Words.</span>
+</div>
+
+</body>
+</html>
