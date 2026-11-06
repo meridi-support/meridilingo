@@ -5,7 +5,7 @@
 
 # 🐾🪄 MeridiLingo — Language Evolution Explorer
 
-**Discover how English evolves — from 1800s slang to 2026 internet culture.**
+**Discover how English evolves — from 1800s slang to 2026 internet culture, now with AI Prompt Vocabulary.**
 
 ---
 
@@ -17,16 +17,17 @@
 
 ## What is MeridiLingo?
 
-A free, browser-based English expression learning tool that lets you explore 450 expressions across 24 categories — from Dead Slang to Movie Quotes, Japanese Onomatopoeia to Modern Internet Culture.
+A free, browser-based English expression learning tool that lets you explore 560 expressions across 31 categories — from Dead Slang to Movie Quotes, Japanese Onomatopoeia to AI Prompt Vocabulary for image generation.
 
 ## ✨ Features
 
 - 🎴 **Card-based UI** — Browse expressions with meaning, example, and trivia
-- 🔤 **24 Categories** — Movie Quotes, Pro Wrestling, Japanese Onomatopoeia, Wasei-Eigo, and more
+- 🔤 **31 Categories** — Movie Quotes, Pro Wrestling, AI Prompts, Japanese Onomatopoeia, Wasei-Eigo, and more
 - 📅 **Era Filter** — Filter by decade (1800s → 2020s)
 - 🧩 **Quiz Mode** — Test your knowledge with random quizzes
 - 🔀 **Shuffle & Sort** — A-Z, Z-A, or random order
 - 🎯 **Card Selection** — Click to select, copy multiple expressions
+- 📋 **One-Click Copy** — Copy AI prompts and commands directly to clipboard
 - 🐾 **Matrix Green Theme** — Dark mode with signature green accent
 - 🌐 **100% Browser-based** — No install, no internet required after load, no ads
 
@@ -34,21 +35,19 @@ A free, browser-based English expression learning tool that lets you explore 450
 
 🔗 **[meridibrand.com/lingo](https://meridibrand.com/lingo)** — Live Now!
 
-🔗 **[GitHub Pages](https://meridi-support.github.io/meridilingo/)**
-
 ## 📋 Version
 
-- **Current:** v1.1.1 (November 1, 2026)
-- **Expressions:** 450
-- **Categories:** 24
+- **Current:** v1.2.0 (November 6, 2026)
+- **Expressions:** 560
+- **Categories:** 31
 
-## 🔥 What's New in v1.1.1
+## 🔥 What's New in v1.2.0
 
-- 🔥 Added 135 new expressions (315 → 450)
-- 🇯🇵 New: Japanese Onomatopoeia, Japanese to English, Wasei-Eigo
-- 🎮 New: Children's Games
-- 📜 Version history popup
-- 🆓 Free HTML version (previously exe)
+- 🎨 Added 110 AI Prompt & Command expressions
+- 📸 7 new AI categories: Weather, Camera, Sports, Game/Fantasy, Pets, Location, Mood
+- 🔢 Total expressions: 450 → 560
+- 📋 One-click copy for AI prompts and commands
+- 💡 Tips for AI image generation beginners
 
 ## 📜 Changelog
 
@@ -60,12 +59,12 @@ See [CHANGELOG.md](CHANGELOG.md) for full update history.
 
 | Tool | Description | Link | Live Demo |
 |------|-------------|------|-----------|
-| 🐾🪄 **MeridiLingo** | **450 expressions — Language Evolution Explorer** | **[Gumroad (Free)](https://meridius4.gumroad.com/l/meridilingo) / [BOOTH (Free)](https://meridistore.booth.pm/items/8992102)** | **[meridibrand.com/lingo](https://meridibrand.com/lingo)** |
+| 🐾🪄 **MeridiLingo** | **560 expressions — Language, Culture & AI Prompt Vocabulary** | **[Gumroad (Free)](https://meridius4.gumroad.com/l/meridilingo) / [BOOTH (Free)](https://meridistore.booth.pm/items/8992102)** | **[meridibrand.com/lingo](https://meridibrand.com/lingo)** |
 | 💻 **MeridiSync** | High-speed snippet manager (Windows) | [Gumroad ($8)](https://meridius4.gumroad.com/l/meridisync) / [BOOTH (¥1,000)](https://meridistore.booth.pm/items/8790105) | [Try Free](https://meridi-support.github.io/meridisync-demo/) |
-| 📅 **MeridiMeet** | Multi-Timezone Scheduler | [Gumroad (Free)](https://meridius4.gumroad.com/l/meridimeet) / [BOOTH (Free)](https://meridistore.booth.pm/items/6340573) | [meridibrand.com/meet](https://meridibrand.com/meet) |
+| 📅 **MeridiMeet** | Multi-Timezone Scheduler | [Gumroad (Free)](https://meridius4.gumroad.com/l/meridimeet) / [BOOTH (Free)](https://meridistore.booth.pm/items/8814602) | [meridibrand.com/meet](https://meridibrand.com/meet) |
 | 🗺️ **MeridiAtlas** | GIS for the Rest of Us | In Development | — |
 | 📔 **MeridiDiary** | Your Journey, Your Map | Planned | — |
-| 🎮 **MeridiPlay** | Fun & Games Collection | Coming Soon | — |
+| 🎮 **MeridiPlay** | Fun & Games Collection (6 Modes) | Coming Soon | — |
 
 ---
 
@@ -110,4 +109,3 @@ MIT License — Use it, modify it, share it. 🐟 Keep swimming.
 *No Ads. No Subscriptions. Just Words.* 🐾
 
 **Meridi Brand © 2026 — Since November 1st, 2026**
-
