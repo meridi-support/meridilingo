@@ -1,6 +1,14 @@
 
 # 📋 CHANGELOG — MeridiLingo
 
+## 🎨 v1.2.0 — November 6, 2026
+- Added 110 new expressions (450 → 560)
+- New: AI Prompt & Command Library (7 categories)
+- New: One-click copy for prompts and commands
+- New: Tips section for AI image generation beginners
+- Era filter consolidated (decade grouping)
+- New expressions in existing categories
+
 ## 🔥 v1.1.1 — November 1, 2026
 - Added 135 new expressions (315 → 450)
 - New Category: Japanese Onomatopoeia (+43)
