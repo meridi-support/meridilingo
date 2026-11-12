@@ -66,10 +66,15 @@ See [CHANGELOG.md](CHANGELOG.md) for full update history.
 | 🐾🪄 **MeridiLingo** | **560 expressions — Language, Culture & AI Prompt Vocabulary** | **[Gumroad (Free)](https://meridius4.gumroad.com/l/meridilingo) / [BOOTH (Free)](https://meridistore.booth.pm/items/8992102)** | **[meridibrand.com/lingo](https://meridibrand.com/lingo)** |
 | 📅 **MeridiMeet** | Multi-Timezone Scheduler | [Gumroad (Free)](https://meridius4.gumroad.com/l/meridimeet) / [BOOTH (Free)](https://meridistore.booth.pm/items/8814602) | [meridibrand.com/meet](https://meridibrand.com/meet) |
 | 🌌 **MeridiStars** | Planetarium — 88 constellations, 119 locations | Free | [meridibrand.com/stars](https://meridibrand.com/stars) |
+| 🌊 **MeridiDepths** | Dive to the deepest ocean — 230+ sea creatures, shipwrecks & records, 11 deep places | Free | [meridibrand.com/depths](https://meridibrand.com/depths) |
 | 🎮 **MeridiPlay** | 18 browser games — casino, fortune-telling, retro candy-shop machines | Free | [meridibrand.com/play](https://meridibrand.com/play) |
 | 💻 **MeridiSync** | High-speed snippet manager (Windows) | [Gumroad ($8)](https://meridius4.gumroad.com/l/meridisync) / [BOOTH (¥1,000)](https://meridistore.booth.pm/items/8790105) | [Try Free](https://meridi-support.github.io/meridisync-demo/) |
 | 🗺️ **MeridiAtlas** | GIS for the Rest of Us | In Development | — |
 | 📔 **MeridiDiary** | Your Journey, Your Map | Planned | — |
+
+---
+
+MeridiLingo → MeridiMeet → MeridiStars → 🌊 MeridiDepths → MeridiPlay → MeridiSync → MeridiAtlas → MeridiDiary
 
 ---
 
