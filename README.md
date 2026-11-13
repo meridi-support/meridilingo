@@ -4,7 +4,7 @@
 
 # 🐾🪄 MeridiLingo — Language Evolution Explorer
 
-**Discover how English evolves — from 1800s slang to 2026 internet culture, now with AI Prompt Vocabulary.**
+**Discover how English evolves — from Heian-era Japan and 1800s slang to 2026 internet culture, with movie lines, sports play-by-play calls and AI Prompt Vocabulary.**
 
 ---
 
@@ -16,17 +16,17 @@
 
 ## What is MeridiLingo?
 
-A free, browser-based English expression learning tool that lets you explore 560 expressions across 31 categories — from Dead Slang to Movie Quotes, Japanese Onomatopoeia to AI Prompt Vocabulary for image generation.
+A free, browser-based English expression learning tool that lets you explore **769 entries across 43 categories** — 599 real-world expressions and 170 AI prompts. From Dead Slang to Movie & Drama Lines, Common Mistakes to Play-by-Play Calls, Japanese Onomatopoeia to AI Prompt Vocabulary for image generation.
 
 ## ✨ Features
 
-- 🎴 **Card-based UI** — Browse expressions with meaning, example, and trivia
-- 🔤 **31 Categories** — Movie Quotes, Pro Wrestling, AI Prompts, Japanese Onomatopoeia, Wasei-Eigo, and more
-- 📅 **Era Filter** — Filter by decade (1800s → 2020s)
+- 🎴 **Card-based UI** — Browse expressions with meaning, example, source and trivia
+- 🔤 **43 Categories** — Common Mistakes, Movie & Drama Lines, Play-by-Play Calls, Pro Wrestling, Anime & Manga, Japanese to English, Wasei-Eigo, AI Prompts and more
+- 📅 **Era Filter** — 25 eras in time order, from Ancient & Heian Period to the 2020s
 - 🧩 **Quiz Mode** — Test your knowledge with random quizzes
-- 🔀 **Shuffle & Sort** — A-Z, Z-A, or random order
+- 🔀 **Shuffle & Sort** — A-Z, Z-A, oldest / newest first, or random order
 - 🎯 **Card Selection** — Click to select, copy multiple expressions
-- 📋 **One-Click Copy** — Copy AI prompts and commands directly to clipboard
+- 🤖 **AI Prompt Cards** — Open a card to see the full ready-to-use prompt and a tip
 - 🐾 **Matrix Green Theme** — Dark mode with signature green accent
 - 🌐 **100% Browser-based** — No install, no internet required after load, no ads
 
@@ -41,17 +41,36 @@ A free, browser-based English expression learning tool that lets you explore 560
 
 ## 📋 Version
 
-- **Current:** v1.2.0 (November 6, 2026)
-- **Expressions:** 560
-- **Categories:** 31
+- **Current:** v1.4.1 (November 13, 2026)
+- **Entries:** 769 (599 expressions + 170 AI prompts)
+- **Categories:** 43
+- **Eras:** 25
 
-## 🔥 What's New in v1.2.0
+## 🔥 What's New
 
-- 🎨 Added 110 AI Prompt & Command expressions
-- 📸 7 new AI categories: Weather, Camera, Sports, Game/Fantasy, Pets, Location, Mood
-- 🔢 Total expressions: 450 → 560
-- 📋 One-click copy for AI prompts and commands
-- 💡 Tips for AI image generation beginners
+### 🏟 v1.4.1 — 2026-11-13
+- Added 49 sports & wrestling expressions (550 → 599) — 769 entries in total
+- New Category: **Play-by-Play Calls** (24) — famous broadcaster calls from MLB, NFL, NBA, NHL and football: "It's GONE!", "See ya!", "Nothing but net!", "Top shelf, where mama hides the cookies!", "GOOOOOAL!"
+- Sports Expressions: +10 football (soccer) terms — own goal, park the bus, nutmeg, squeaky bum time, clean sheet, football / soccer …
+- Pro Wrestling: +15 insider terms you can use every day — kayfabe, heel turn, tap out, tag in, cheap pop, screwjob, Monday Night Wars …
+
+### 📚 v1.4.0 — 2026-11-13
+- Added 100 new English expressions (450 → 550) — 720 entries in total
+- New Category: **Common Mistakes** (21) — "What's up? → Not much.", "I'm bored / I'm boring", "Fight! → You got this!"
+- New Category: **Movie & Drama Lines** (20) — "Didn't see that coming!", "I'm on it.", "I'll be right back."
+- Anime & Manga: 3 → 23 (isekai, tsundere, plot armor, nakama, sub or dub? …)
+- Japanese to English: +14 (brain freeze, buttery smooth = ヌルヌル, Sunday scaries = サザエさん症候群, read the room = 空気を読む …)
+- Idioms & Phrases: +17 (That's the way the cookie crumbles, Speak of the devil, Friday the 13th …)
+- Modern Slang: +8 (living rent-free in my head, mid, in my ___ era, NPC energy …)
+
+### 🤖 v1.3.0 — 2026-11-13
+- Added 60 new AI prompts (110 → 170) — 620 entries in total
+- New AI categories: Japanese Art Style, Shops & Buildings, Lighting, Texture & Material, Food & Drink, Negative Prompts
+- Simplified eras (49 → 25): single years grouped into decades/centuries — the exact year now appears in the trivia
+- Eras are now listed in time order; Classic & Timeless show a short description
+- AI prompt cards now show the full prompt and tip when opened
+- Fixed: duplicate "/style pixel-art" (Gaming version renamed to "/style 8-bit-game")
+- Fixed: footer links (MeridiMeet, Buy Me a Coffee)
 
 ## 📜 Changelog
 
