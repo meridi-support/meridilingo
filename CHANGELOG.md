@@ -4,6 +4,19 @@ All notable changes to MeridiLingo are listed here.
 Live: [meridibrand.com/lingo](https://meridibrand.com/lingo)
 
 ---
+## 💡 v1.5.0 — 2026-11-25
+- Added 152 expressions (769 → 921) — the biggest update yet
+- New: 💡 flip-card trivia — tap the 💡 on a card to flip it over and read the trivia on the back (smooth 3D flip). Tap ↩ to flip back
+- New: longer trivia for 88 cards — where the word came from, who made it famous, and how to say it in Japanese
+- Modern Slang: +60 (51 → 111) — go viral, left on read, ratioed, doomscrolling, chronically online, rage bait, clickbait, troll, photobomb, aesthetic, soft launch / hard launch, receipts, clout, I can't even, I'm dead 💀, big mood, same, shook, sending me, bruh, facepalm, hyped, unhinged, valid, wholesome, banger, bop, fire, lit, goated, iconic, highkey, stan, let him cook, extra, basic, cringe, bougie, hot take, the ick, green flag, beige flag, gaslighting, bestie, I'm down, flake, bail, sus, take the W / take an L, cooked, locked in, yapping, demure, girl math, earworm, rabbit hole, quiet quitting …
+- "No strings attached" English: +25 — What's the catch?, too good to be true, no such thing as a free lunch, read the fine print, hidden fees, bait and switch, freebie, complimentary, free of charge, BOGO, free trial, auto-renew, cancel anytime, pay what you want, paywall, freemium, ad-free, cheapskate, upsell, get it for a song, highway robbery …
+- New Category: Around Town (25) — restaurants, banks, the post office and shops: check ⇔ bill, to go ⇔ takeaway, refill, Can I get a box?, on the house, split the check, my treat, tip, still or sparkling?, withdraw / deposit, package ⇔ parcel, tracking number, I'm just looking, receipt, return / refund …
+- New Category: Travel English (36) — airport, immigration, hotel, trains, taxis and directions: boarding pass, carry-on, layover, Nothing to declare, What's the purpose of your visit?, Can you hold my bags?, I locked myself out, one-way ⇔ single, last train, turnstile, I missed my stop, Right here is fine, How do I get to ~?, restroom ⇔ loo …
+- Wasei-Eigo: +6 — service → on the house, free → freelance, register, front desk, toiletries, debit card
+- Common Mistakes: +1 — reservation vs appointment
+- Changed: search description 760+ → 900+ expressions
+- Fixed: Cheapskate era 1890s → 1800s (eras before 1900 are grouped by century)
+- 🐾 …and a little paw is hiding somewhere
 
 ## 🏟 v1.4.1 — 2026-11-13
 - Added 49 sports & wrestling expressions (550 → 599) — 769 entries in total
