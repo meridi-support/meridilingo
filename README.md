@@ -77,7 +77,7 @@ New expressions are added regularly — especially Modern Slang and the English 
 - Idioms & Phrases: +17 (That's the way the cookie crumbles, Speak of the devil, Friday the 13th …)
 - Modern Slang: +8 (living rent-free in my head, mid, in my ___ era, NPC energy …)
 
-Older updates (v1.3.0 and before) are in the [Releases](https://github.com/meridi-support/meridilingo/releases) and the 📜 CHANGELOG inside the app (tap the version number).
+Older updates (v1.3.0 and before) are in [CHANGELOG.md](CHANGELOG.md), the [Releases](https://github.com/meridi-support/meridilingo/releases), and the 📜 CHANGELOG inside the app (tap the version number).
 
 ---
 
